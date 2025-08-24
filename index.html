@@ -48,26 +48,36 @@
       <button id="nextBtn" title="Atalho: N">Gerar número <span class="kbd">N</span></button>
       <button id="checkBtn" title="Atalho: Enter">Verificar <span class="kbd">Enter</span></button>
       <button id="helpBtn" title="Atalho: H">Ajuda <span class="kbd">H</span></button>
+
       <span class="pill">Intervalo: 
         <select id="range">
-          <option value="10-60">10–60 (padrão)</option>
-          <option value="1-40">1–40</option>
-          <option value="20-100">20–100</option>
+          <option value="1-15">1–15 (padrão)</option>
+          <option value="15-30">15–30</option>
+          <option value="1-30">1–30</option>
+          <option value="30-45">30–45</option>
+          <option value="45-60">45–60</option>
+          <option value="30-60">30–60</option>
+          <option value="1-60">1–60</option>
           <option value="custom">Personalizar…</option>
         </select>
       </span>
       <span id="customWrap" class="pill" style="display:none">
-        <input id="minN" type="number" value="10" style="width:80px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px"> –
-        <input id="maxN" type="number" value="60" style="width:80px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px">
+        <input id="minN" type="number" value="1" style="width:80px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px"> –
+        <input id="maxN" type="number" value="15" style="width:80px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px">
       </span>
+
+      <span class="pill">
+        <label><input id="adaptiveCB" type="checkbox" checked style="vertical-align:middle"> Adaptativo</label>
+      </span>
+      <button id="resetBtn" title="Zerar aprendizado">Resetar treino</button>
     </div>
 
     <div class="big" id="number">—</div>
-    <div class="legend" id="hint">Gere um número e escolha a contagem e o lado. O item de force é sempre o <b>2º da esquerda</b>.</div>
+    <div class="legend" id="hint">Gere um número e escolha a contagem e o lado. O item de força é sempre o <b>2º da esquerda</b>.</div>
 
     <div class="board" aria-label="linha de 5 itens">
       <div class="item">1º</div>
-      <div class="item force">2º (force)</div>
+      <div class="item force">2º (força)</div>
       <div class="item">3º</div>
       <div class="item">4º</div>
       <div class="item">5º</div>
@@ -108,31 +118,31 @@
       <div>
         <h3 style="margin:0 0 6px">Coração do método</h3>
         <div class="legend">
-          • force 1 item entre 5; o item de force fica em <b>2º da esquerda</b> (fixo).<br>
+          • Força 1 item entre 5; o item de força fica em <b>2º da esquerda</b> (fixo).<br>
           • <b>Tipo:</b> se <b>N é par → Basic</b>; se <b>N é ímpar → Bounce</b>.<br>
-          • <b>Lado (Basic):</b> comece pela <b>esquerda</b> se <code>N ≡ 0 ou 2 (mod 8)</code>, senão comece pela <b>direita</b>.<br>
-          • <b>Lado (Bounce):</b> use <b>N+1</b> para a mesma regra acima (decide o lado), e conte por <i>movimentos</i>.<br>
-          • “Basic” conta <i>pontos</i> 1,2,3,4,5,4,3,2,1…; “Bounce” conta <i>movimentos</i> entre posições.
+          • <b>Lado (Basic):</b> comece pela <b>esquerda</b> se <code>N ≡ 0 ou 2 (mod 8)</code>, senão pela <b>direita</b>.<br>
+          • <b>Lado (Bounce):</b> use <b>N+1</b> para a mesma regra acima (e conte <i>movimentos</i>).<br>
+          • “Basic” conta <i>pontos</i> 1,2,3,4,5,4,3,2,1…; “Bounce” conta <i>movimentos</i>.
         </div>
         <div class="hr"></div>
         <h3 style="margin:0 0 6px">Garantindo par (opcional)</h3>
         <div class="legend">
-          • <b>IBO/DBO</b> (increase/decrease by one) — se sair ímpar, peça a outro espectador para somar ou subtrair 1 (fica par).<br>
-          • Outros métodos: “tag team”, pareamento/pares, campo de seleção apenas com totais pares etc.
+          • <b>IBO/DBO</b> (increase/decrease by one).<br>
+          • Outros: “tag team”, pareamento/pares, campo de seleção com totais pares etc.
         </div>
       </div>
       <div>
         <h3 style="margin:0 0 6px">Dicas</h3>
         <div class="legend">
-          • Atalhos: <span class="kbd">N</span> gerar, <span class="kbd">Enter</span> verificar, <span class="kbd">H</span> ajuda.<br>
-          • Treine pensar só no <b>resto de N por 8</b> e na <b>paridade</b> — vira reflexo.<br>
-          • Em cena, “Bounce” fica lindo com uma peça (ex.: peão de xadrez) andando; ajuda a justificar a contagem de movimentos.
+          • Atalhos: <span class="kbd">N</span>, <span class="kbd">Enter</span>, <span class="kbd">H</span>.<br>
+          • Pense só em <b>N mod 8</b> + <b>paridade</b>.<br>
+          • “Bounce” com uma peça andando (ex.: peão) justifica os movimentos.
         </div>
         <div class="hr"></div>
         <h3 style="margin:0 0 6px">Exemplo mental</h3>
         <div class="legend">
-          N=22 → par ⇒ Basic; 22 ≡ 6 (mod 8) ⇒ começa <b>Direita</b> → force no 2º da esquerda.<br>
-          N=33 → ímpar ⇒ Bounce; use 34 ⇒ 34 ≡ 2 (mod 8) ⇒ começa <b>Esquerda</b>.
+          N=22 → Basic; 22 ≡ 6 (mod 8) ⇒ começa <b>Direita</b>.<br>
+          N=33 → Bounce; use 34 ⇒ 34 ≡ 2 (mod 8) ⇒ começa <b>Esquerda</b>.
         </div>
       </div>
     </div>
@@ -145,14 +155,18 @@
   const $ = sel => document.querySelector(sel);
   const numberEl = $('#number'), feedback = $('#feedback');
   const okEl=$('#ok'), errEl=$('#err'), streakEl=$('#streak'), timerEl=$('#timer');
-  const nextBtn=$('#nextBtn'), checkBtn=$('#checkBtn');
+  const nextBtn=$('#nextBtn'), checkBtn=$('#checkBtn'), resetBtn=$('#resetBtn');
   const helpBtn=$('#helpBtn'), modal=$('#modal'), closeHelp=$('#closeHelp');
   const tBasic=$('#tBasic'), tBounce=$('#tBounce');
   const sLeft=$('#sLeft'), sRight=$('#sRight');
   const stepCB=$('#step');
   const rangeSel=$('#range'), customWrap=$('#customWrap'), minN=$('#minN'), maxN=$('#maxN');
+  const adaptiveCB=$('#adaptiveCB');
 
   let N=null, lastN=null, startTime=0, ok=0, err=0, streak=0, locked=false;
+
+  // Pesos por "tipo de caso" (BL, BR, bL, bR)
+  let weights = [1,1,1,1];
 
   function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
   function now(){return performance.now()}
@@ -161,44 +175,82 @@
 
   function currentRange(){
     if(rangeSel.value==='custom'){
-      let a=parseInt(minN.value||'10',10), b=parseInt(maxN.value||'60',10);
+      let a=parseInt(minN.value||'1',10), b=parseInt(maxN.value||'15',10);
       if(a>b) [a,b]=[b,a];
       return [Math.max(1,a), Math.min(9999,b)];
     }
     const [a,b]=rangeSel.value.split('-').map(x=>parseInt(x,10)); return [a,b];
   }
 
+  // ===== Regras QUINTA =====
+  function correctRule(n){
+    const tipo = (n%2===0)? 'basic':'bounce';
+    const m = (tipo==='bounce')? n+1 : n;
+    const r = ((m%8)+8)%8;
+    const lado = (r===0 || r===2)? 'left':'right';
+    return {tipo,lado};
+  }
+  function bucketFromRule(rule){
+    if(rule.tipo==='basic' && rule.lado==='left') return 0;
+    if(rule.tipo==='basic' && rule.lado==='right') return 1;
+    if(rule.tipo==='bounce' && rule.lado==='left') return 2;
+    return 3; // bounce+right
+  }
+
+  // ===== Geração de N: sem repetição imediata + viés adaptativo =====
+  function sampleBucketAvailable(a, b){
+    const seen = new Set();
+    for(let i=0;i<400 && seen.size<4;i++){
+      seen.add(bucketFromRule(correctRule(randInt(a,b))));
+    }
+    return seen;
+  }
+
+  function pickBucket(a, b){
+    const avail = sampleBucketAvailable(a, b);
+    const effective = [0,0,0,0];
+    let sum=0;
+    for(let i=0;i<4;i++){
+      if(avail.has(i)){
+        effective[i] = adaptiveCB.checked ? Math.max(0.05, weights[i]) : 1;
+        sum += effective[i];
+      }
+    }
+    let r = Math.random()*sum;
+    for(let i=0;i<4;i++){
+      if(!avail.has(i)) continue;
+      if(r < effective[i]) return i;
+      r -= effective[i];
+    }
+    for(let i=0;i<4;i++) if(avail.has(i)) return i;
+    return 0;
+  }
+
   function newNumber(){
     const [a,b]=currentRange();
+    const targetBucket = pickBucket(a,b);
 
-    // evita repetir o mesmo número consecutivamente
-    let candidate;
-    if (a === b) {
-      candidate = a; // intervalo degenerado
-    } else {
-      do {
-        candidate = randInt(a,b);
-      } while (candidate === lastN);
+    let candidate = null, tries = 0;
+    const MAX_TRIES = 400;
+    while(tries++ < MAX_TRIES){
+      const x = randInt(a,b);
+      if(x === lastN && b>a) continue; // evita repetição imediata
+      if(bucketFromRule(correctRule(x)) === targetBucket){ candidate = x; break; }
     }
+    if(candidate===null){
+      do { candidate = (a===b? a : randInt(a,b)); } while(candidate===lastN && b>a);
+    }
+
     N = candidate;
     lastN = N;
 
     numberEl.textContent = String(N);
-    startTime = now(); feedback.textContent='';
+    startTime = now();
+    feedback.textContent='';
     locked=false;
   }
 
-  // ===== Quinta engine =====
-  // Decide "regra correta" (tipo + lado)
-  function correctRule(n){
-    let tipo = (n%2===0)? 'basic':'bounce'; // par->basic; ímpar->bounce
-    let m = (tipo==='bounce')? n+1 : n;     // bounce decide lado com N+1
-    const r = ((m%8)+8)%8;                  // resto mod 8
-    const lado = (r===0 || r===2)? 'left':'right'; // esquerda se ≡0 ou 2
-    return {tipo,lado};
-  }
-
-  // Simulação para validar se cai no 2º da esquerda
+  // ===== Simulação / verificação =====
   function simulate(n, tipo, lado, step=false){
     const target=1;
     let pos = (lado==='left')? 0: 4;
@@ -230,11 +282,32 @@
     return {tipo,lado};
   }
 
+  // ===== Adaptação pelos tempos (FAST ≤3s; SLOW ≥5s) =====
+  function resetLearning(){ weights = [1,1,1,1]; }
+
+  function updateAdaptiveWeights(bucket, elapsedSec){
+    if(!adaptiveCB.checked) return;
+    const SLOW = 5.0, FAST = 3.0;
+    const UP = 0.3, DOWN = 0.2;
+    const MIN_W = 0.2, MAX_W = 3.0;
+
+    if(elapsedSec >= SLOW){
+      weights[bucket] = Math.min(MAX_W, weights[bucket] + UP);
+    }else if(elapsedSec <= FAST){
+      weights[bucket] = Math.max(MIN_W, weights[bucket] - DOWN);
+    }else{
+      const toward1 = 0.05;
+      weights[bucket] += (1 - weights[bucket]) * toward1;
+    }
+  }
+
   function verify(){
     if(locked || N==null) return;
     locked=true;
-    const sel = userSelection();
+
+    const elapsed = (now()-startTime)/1000;
     const ideal = correctRule(N);
+    const sel = userSelection();
     const sim  = simulate(N, sel.tipo, sel.lado, stepCB.checked);
 
     const idealTxt = `${ideal.tipo==='basic'?'Basic':'Bounce'} + ${ideal.lado==='left'?'Esq.':'Dir.'}`;
@@ -244,10 +317,10 @@
 
     if(isRight){
       ok++; streak++;
-      feedback.innerHTML = `<span class="ok">Correto!</span> <span class="muted">(${userTxt})</span>`;
+      feedback.innerHTML = `<span class="ok">Correto!</span> <span class="muted">(${userTxt}) — ${elapsed.toFixed(1)}s</span>`;
     }else{
       err++; streak=0;
-      feedback.innerHTML = `<span class="err">Errou.</span> <span class="muted">Você escolheu ${userTxt}. Ideal: <b>${idealTxt}</b>.</span>`;
+      feedback.innerHTML = `<span class="err">Errou.</span> <span class="muted">Você escolheu ${userTxt}. Ideal: <b>${idealTxt}</b>. — ${elapsed.toFixed(1)}s</span>`;
     }
 
     if(stepCB.checked && sim.log.length){
@@ -256,6 +329,10 @@
     }
 
     okEl.textContent=ok; errEl.textContent=err; streakEl.textContent=streak;
+
+    // atualiza aprendizado para o bucket deste N
+    const bucket = bucketFromRule(ideal);
+    updateAdaptiveWeights(bucket, elapsed);
   }
 
   // ===== events =====
@@ -264,6 +341,10 @@
   helpBtn.addEventListener('click', ()=> modal.style.display='grid');
   closeHelp.addEventListener('click', ()=> modal.style.display='none');
   rangeSel.addEventListener('change', ()=> customWrap.style.display = (rangeSel.value==='custom'?'inline-flex':'none'));
+  resetBtn.addEventListener('click', ()=>{
+    ok=err=streak=0; okEl.textContent=0; errEl.textContent=0; streakEl.textContent=0;
+    lastN=null; feedback.textContent=''; resetLearning();
+  });
 
   document.addEventListener('keydown', (e)=>{
     const k = e.key.toLowerCase();
@@ -273,6 +354,7 @@
   });
 
   // inicial
+  resetLearning();
   newNumber();
 })();
 </script>
