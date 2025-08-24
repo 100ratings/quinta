@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Treino QUINTA — Mecânica Rápida</title>
+<style>
+  :root{--bg:#0f1115;--fg:#e6e6e6;--muted:#9aa3b2;--ok:#19c37d;--err:#ff5c5c;--card:#151923;--accent:#7aa2ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+  .wrap{max-width:880px;margin:36px auto;padding:0 20px}
+  .card{background:var(--card);border:1px solid #202637;border-radius:12px;padding:18px}
+  h1{font-size:20px;margin:0 0 8px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .big{font-size:28px;font-weight:700}
+  .muted{color:var(--muted)}
+  .pill{padding:6px 10px;border-radius:999px;border:1px solid #2a3242;background:#131827;font-size:12px}
+  button{background:#1d2433;color:var(--fg);border:1px solid #2a3242;border-radius:10px;padding:11px 14px;font-size:15px;cursor:pointer}
+  button:hover{border-color:#3a4760}
+  .kbd{font-family:ui-monospace,Consolas,Menlo,monospace;background:#111521;border:1px solid #273047;border-radius:6px;padding:2px 6px;font-size:12px}
+  .stats{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0}
+  .stat{background:#121726;border:1px solid #20283a;border-radius:8px;padding:8px 10px;font-size:13px}
+  .feedback{margin-top:8px;font-size:16px}
+  .ok{color:var(--ok)} .err{color:var(--err)}
+  .board{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:12px}
+  .item{border:1px solid #2a3242;border-radius:10px;padding:10px;text-align:center}
+  .force{outline:2px solid var(--accent)}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:8px}
+  .seg{display:flex;border:1px solid #2a3242;border-radius:10px;overflow:hidden}
+  .seg input{display:none}
+  .seg label{padding:9px 12px;cursor:pointer}
+  .seg input:checked + label{background:#2a3347}
+  .modal{position:fixed;inset:0;display:none;place-items:center;background:#0008;padding:20px}
+  .modal .inner{max-width:900px;width:100%;background:#0f121d;border:1px solid #2a3242;border-radius:12px;padding:18px}
+  .modal h2{margin:0 0 8px;font-size:18px}
+  .legend{font-size:14px;color:var(--muted)}
+  .legend b{color:#cfd8ea}
+  .hr{height:1px;background:#2a3242;margin:12px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Treino <span class="muted">QUINTA — Mecânica Rápida</span></h1>
+
+    <div class="row" style="margin:6px 0 10px">
+      <button id="nextBtn" title="Atalho: N">Gerar número <span class="kbd">N</span></button>
+      <button id="checkBtn" title="Atalho: Enter">Verificar <span class="kbd">Enter</span></button>
+      <button id="helpBtn" title="Atalho: H">Ajuda <span class="kbd">H</span></button>
+      <span class="pill">Intervalo: 
+        <select id="range">
+          <option value="10-60">10–60 (padrão)</option>
+          <option value="1-40">1–40</option>
+          <option value="20-100">20–100</option>
+          <option value="custom">Personalizar…</option>
+        </select>
+      </span>
+      <span id="customWrap" class="pill" style="display:none">
+        <input id="minN" type="number" value="10" style="width:80px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px"> –
+        <input id="maxN" type="number" value="60" style="width:80px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px">
+      </span>
+    </div>
+
+    <div class="big" id="number">—</div>
+    <div class="legend" id="hint">Gere um número e escolha a contagem e o lado. O item de força é sempre o <b>2º da esquerda</b>.</div>
+
+    <div class="board" aria-label="linha de 5 itens">
+      <div class="item">1º</div>
+      <div class="item force">2º (força)</div>
+      <div class="item">3º</div>
+      <div class="item">4º</div>
+      <div class="item">5º</div>
+    </div>
+
+    <div class="controls">
+      <div class="seg" role="radiogroup" aria-label="Tipo de contagem">
+        <input id="tBasic" name="tipo" type="radio" checked><label for="tBasic">Basic</label>
+        <input id="tBounce" name="tipo" type="radio"><label for="tBounce">Bounce</label>
+      </div>
+      <div class="seg" role="radiogroup" aria-label="Lado de início">
+        <input id="sLeft" name="side" type="radio" checked><label for="sLeft">Esquerda</label>
+        <input id="sRight" name="side" type="radio"><label for="sRight">Direita</label>
+      </div>
+      <span class="pill">Passo-a-passo <input id="step" type="checkbox" style="vertical-align:middle"></span>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <div class="stats">
+      <div class="stat">Acertos: <b id="ok">0</b></div>
+      <div class="stat">Erros: <b id="err">0</b></div>
+      <div class="stat">Série: <b id="streak">0</b></div>
+      <div class="stat">Tempo: <b id="timer">0.0s</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de ajuda -->
+<div class="modal" id="modal">
+  <div class="inner">
+    <div class="row" style="justify-content:space-between;align-items:center">
+      <h2>Regras rápidas & lembretes</h2>
+      <button id="closeHelp">Fechar</button>
+    </div>
+    <div class="hr"></div>
+    <div class="grid2">
+      <div>
+        <h3 style="margin:0 0 6px">Coração do método</h3>
+        <div class="legend">
+          • Força 1 item entre 5; o item de força fica em <b>2º da esquerda</b> (fixo).<br>
+          • <b>Tipo:</b> se <b>N é par → Basic</b>; se <b>N é ímpar → Bounce</b>.<br>
+          • <b>Lado (Basic):</b> comece pela <b>esquerda</b> se <code>N ≡ 0 ou 2 (mod 8)</code>, senão comece pela <b>direita</b>.<br>
+          • <b>Lado (Bounce):</b> use <b>N+1</b> para a mesma regra acima (decide o lado), e conte por <i>movimentos</i>.<br>
+          • “Basic” conta <i>pontos</i> 1,2,3,4,5,4,3,2,1…; “Bounce” conta <i>movimentos</i> entre posições.
+        </div>
+        <div class="hr"></div>
+        <h3 style="margin:0 0 6px">Garantindo par (opcional)</h3>
+        <div class="legend">
+          • <b>IBO/DBO</b> (increase/decrease by one) — se sair ímpar, peça a outro espectador para somar ou subtrair 1 (fica par).<br>
+          • Outros métodos: “tag team”, pareamento/pares, campo de seleção apenas com totais pares etc.
+        </div>
+      </div>
+      <div>
+        <h3 style="margin:0 0 6px">Dicas</h3>
+        <div class="legend">
+          • Atalhos: <span class="kbd">N</span> gerar, <span class="kbd">Enter</span> verificar, <span class="kbd">H</span> ajuda.<br>
+          • Treine pensar só no <b>resto de N por 8</b> e na <b>paridade</b> — vira reflexo.<br>
+          • Em cena, “Bounce” fica lindo com uma peça (ex.: peão de xadrez) andando; ajuda a justificar a contagem de movimentos.
+        </div>
+        <div class="hr"></div>
+        <h3 style="margin:0 0 6px">Exemplo mental</h3>
+        <div class="legend">
+          N=22 → par ⇒ Basic; 22 ≡ 6 (mod 8) ⇒ começa <b>Direita</b> → força no 2º da esquerda.<br>
+          N=33 → ímpar ⇒ Bounce; use 34 ⇒ 34 ≡ 2 (mod 8) ⇒ começa <b>Esquerda</b>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(()=> {
+  // ===== util =====
+  const $ = sel => document.querySelector(sel);
+  const numberEl = $('#number'), feedback = $('#feedback');
+  const okEl=$('#ok'), errEl=$('#err'), streakEl=$('#streak'), timerEl=$('#timer');
+  const nextBtn=$('#nextBtn'), checkBtn=$('#checkBtn');
+  const helpBtn=$('#helpBtn'), modal=$('#modal'), closeHelp=$('#closeHelp');
+  const tBasic=$('#tBasic'), tBounce=$('#tBounce');
+  const sLeft=$('#sLeft'), sRight=$('#sRight');
+  const stepCB=$('#step');
+  const rangeSel=$('#range'), customWrap=$('#customWrap'), minN=$('#minN'), maxN=$('#maxN');
+
+  let N=null, lastN=null, startTime=0, ok=0, err=0, streak=0, locked=false;
+
+  function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+  function now(){return performance.now()}
+  function updateTimer(){ if(startTime){ timerEl.textContent=((now()-startTime)/1000).toFixed(1)+'s'; } requestAnimationFrame(updateTimer) }
+  requestAnimationFrame(updateTimer);
+
+  function currentRange(){
+    if(rangeSel.value==='custom'){
+      let a=parseInt(minN.value||'10',10), b=parseInt(maxN.value||'60',10);
+      if(a>b) [a,b]=[b,a];
+      return [Math.max(1,a), Math.min(9999,b)];
+    }
+    const [a,b]=rangeSel.value.split('-').map(x=>parseInt(x,10)); return [a,b];
+  }
+
+  function newNumber(){
+    const [a,b]=currentRange();
+
+    // evita repetir o mesmo número consecutivamente
+    let candidate;
+    if (a === b) {
+      candidate = a; // intervalo degenerado
+    } else {
+      do {
+        candidate = randInt(a,b);
+      } while (candidate === lastN);
+    }
+    N = candidate;
+    lastN = N;
+
+    numberEl.textContent = String(N);
+    startTime = now(); feedback.textContent='';
+    locked=false;
+  }
+
+  // ===== Quinta engine =====
+  // Decide "regra correta" (tipo + lado)
+  function correctRule(n){
+    let tipo = (n%2===0)? 'basic':'bounce'; // par->basic; ímpar->bounce
+    let m = (tipo==='bounce')? n+1 : n;     // bounce decide lado com N+1
+    const r = ((m%8)+8)%8;                  // resto mod 8
+    const lado = (r===0 || r===2)? 'left':'right'; // esquerda se ≡0 ou 2
+    return {tipo,lado};
+  }
+
+  // Simulação para validar se cai no 2º da esquerda
+  function simulate(n, tipo, lado, step=false){
+    const target=1;
+    let pos = (lado==='left')? 0: 4;
+    let dir = (lado==='left')? +1 : -1;
+    let log=[];
+    if(tipo==='basic'){
+      let count=0;
+      while(count<n){
+        count++;
+        if(step) log.push({count,pos});
+        if(count===n) break;
+        pos += dir;
+        if(pos===4 || pos===0) dir*=-1;
+      }
+    }else{
+      let moves=0;
+      while(moves<n){
+        pos += dir; moves++;
+        if(step) log.push({count:moves,pos});
+        if(pos===4 || pos===0) dir*=-1;
+      }
+    }
+    return {hit:(pos===target), pos, log};
+  }
+
+  function userSelection(){
+    const tipo = tBasic.checked? 'basic':'bounce';
+    const lado = sLeft.checked? 'left':'right';
+    return {tipo,lado};
+  }
+
+  function verify(){
+    if(locked || N==null) return;
+    locked=true;
+    const sel = userSelection();
+    const ideal = correctRule(N);
+    const sim  = simulate(N, sel.tipo, sel.lado, stepCB.checked);
+
+    const idealTxt = `${ideal.tipo==='basic'?'Basic':'Bounce'} + ${ideal.lado==='left'?'Esq.':'Dir.'}`;
+    const userTxt  = `${sel.tipo==='basic'?'Basic':'Bounce'} + ${sel.lado==='left'?'Esq.':'Dir.'}`;
+
+    const isRight = sim.hit;
+
+    if(isRight){
+      ok++; streak++;
+      feedback.innerHTML = `<span class="ok">Correto!</span> <span class="muted">(${userTxt})</span>`;
+    }else{
+      err++; streak=0;
+      feedback.innerHTML = `<span class="err">Errou.</span> <span class="muted">Você escolheu ${userTxt}. Ideal: <b>${idealTxt}</b>.</span>`;
+    }
+
+    if(stepCB.checked && sim.log.length){
+      const path = sim.log.map(s=>s.pos+1).join(' → ');
+      feedback.innerHTML += `<div class="muted" style="margin-top:6px">Trajeto: ${path}</div>`;
+    }
+
+    okEl.textContent=ok; errEl.textContent=err; streakEl.textContent=streak;
+  }
+
+  // ===== events =====
+  nextBtn.addEventListener('click', newNumber);
+  checkBtn.addEventListener('click', verify);
+  helpBtn.addEventListener('click', ()=> modal.style.display='grid');
+  closeHelp.addEventListener('click', ()=> modal.style.display='none');
+  rangeSel.addEventListener('change', ()=> customWrap.style.display = (rangeSel.value==='custom'?'inline-flex':'none'));
+
+  document.addEventListener('keydown', (e)=>{
+    const k = e.key.toLowerCase();
+    if(k==='n'){ newNumber(); }
+    else if(e.key==='Enter'){ verify(); }
+    else if(k==='h'){ modal.style.display='grid'; }
+  });
+
+  // inicial
+  newNumber();
+})();
+</script>
+</body>
+</html>
