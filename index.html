@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Treino QUINTA — Mecânica Rápida</title>
+<title>Treino QUINTA</title>
 <style>
   :root{--bg:#0f1115;--fg:#e6e6e6;--muted:#9aa3b2;--ok:#19c37d;--err:#ff5c5c;--card:#151923;--accent:#7aa2ff}
   *{box-sizing:border-box}
@@ -37,6 +37,8 @@
   .legend b{color:#cfd8ea}
   .hr{height:1px;background:#2a3242;margin:12px 0}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  /* NOVO: caixinha de resultado do modo manual */
+  .manualResult{font-size:14px;margin-left:4px}
 </style>
 </head>
 <body>
@@ -70,6 +72,16 @@
         <label><input id="adaptiveCB" type="checkbox" checked style="vertical-align:middle"> Adaptativo</label>
       </span>
       <button id="resetBtn" title="Zerar aprendizado">Resetar treino</button>
+    </div>
+
+    <!-- NOVO: modo manual -->
+    <div class="row" style="margin:0 0 8px">
+      <span class="pill">
+        Digitar N:
+        <input id="manualN" type="number" inputmode="numeric" placeholder="ex: 33" style="width:90px;margin-left:6px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px">
+      </span>
+      <button id="analyzeBtn" title="Atalho: Ctrl+Enter">Descobrir lado & tipo</button>
+      <span id="manualOut" class="manualResult muted">—</span>
     </div>
 
     <div class="big" id="number">—</div>
@@ -106,7 +118,7 @@
   </div>
 </div>
 
-<!-- Modal de ajuda -->
+<!-- Modal de ajuda (inalterado) -->
 <div class="modal" id="modal">
   <div class="inner">
     <div class="row" style="justify-content:space-between;align-items:center">
@@ -163,6 +175,11 @@
   const rangeSel=$('#range'), customWrap=$('#customWrap'), minN=$('#minN'), maxN=$('#maxN');
   const adaptiveCB=$('#adaptiveCB');
 
+  // NOVO: refs do modo manual
+  const manualN = $('#manualN');
+  const analyzeBtn = $('#analyzeBtn');
+  const manualOut = $('#manualOut');
+
   let N=null, lastN=null, startTime=0, ok=0, err=0, streak=0, locked=false;
 
   // Pesos por "tipo de caso" (BL, BR, bL, bR)
@@ -188,7 +205,7 @@
     const m = (tipo==='bounce')? n+1 : n;
     const r = ((m%8)+8)%8;
     const lado = (r===0 || r===2)? 'left':'right';
-    return {tipo,lado};
+    return {tipo,lado, r, m};
   }
   function bucketFromRule(rule){
     if(rule.tipo==='basic' && rule.lado==='left') return 0;
@@ -335,6 +352,25 @@
     updateAdaptiveWeights(bucket, elapsed);
   }
 
+  // ===== NOVO: análise manual =====
+  function analyzeManual(){
+    const raw = manualN.value.trim();
+    if(!raw){ manualOut.textContent='—'; return; }
+    const n = Number(raw);
+    if(!Number.isFinite(n) || !Number.isInteger(n) || n<=0){
+      manualOut.innerHTML = `<span class="err">Digite um inteiro positivo.</span>`;
+      return;
+    }
+    const rule = correctRule(n);
+    // refletir nos botões
+    (rule.tipo==='basic'? tBasic : tBounce).checked = true;
+    (rule.lado==='left'? sLeft : sRight).checked = true;
+    // texto curto
+    const tipoTxt = rule.tipo==='basic' ? 'Basic' : 'Bounce';
+    const ladoTxt = rule.lado==='left' ? 'Esquerda' : 'Direita';
+    manualOut.innerHTML = `<span class="ok">${tipoTxt} + ${ladoTxt}</span> <span class="muted">(N=${n}${rule.tipo==='bounce'?', usa N+1='+(rule.m):''}; mod8=${rule.r})</span>`;
+  }
+
   // ===== events =====
   nextBtn.addEventListener('click', newNumber);
   checkBtn.addEventListener('click', verify);
@@ -343,15 +379,21 @@
   rangeSel.addEventListener('change', ()=> customWrap.style.display = (rangeSel.value==='custom'?'inline-flex':'none'));
   resetBtn.addEventListener('click', ()=>{
     ok=err=streak=0; okEl.textContent=0; errEl.textContent=0; streakEl.textContent=0;
-    lastN=null; feedback.textContent=''; resetLearning();
+    lastN=null; feedback.textContent=''; manualOut.textContent='—'; manualN.value='';
+    resetLearning();
   });
 
+  // atalhos
   document.addEventListener('keydown', (e)=>{
     const k = e.key.toLowerCase();
     if(k==='n'){ newNumber(); }
-    else if(e.key==='Enter'){ verify(); }
+    else if(e.key==='Enter' && !e.ctrlKey){ verify(); }      // Enter → verificar número gerado
+    else if(e.key==='enter' && e.ctrlKey) { analyzeManual(); } // não funciona assim; fallback abaixo
     else if(k==='h'){ modal.style.display='grid'; }
   });
+  // Enter dentro do input manual → analisar
+  manualN.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ analyzeManual(); } });
+  analyzeBtn.addEventListener('click', analyzeManual);
 
   // inicial
   resetLearning();
