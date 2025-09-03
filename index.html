@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Treino QUINTA</title>
+<title>Training THURSDAY</title>
 <style>
   :root{--bg:#0f1115;--fg:#e6e6e6;--muted:#9aa3b2;--ok:#19c37d;--err:#ff5c5c;--card:#151923;--accent:#7aa2ff}
   *{box-sizing:border-box}
@@ -37,30 +37,30 @@
   .legend b{color:#cfd8ea}
   .hr{height:1px;background:#2a3242;margin:12px 0}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  /* NOVO: caixinha de resultado do modo manual */
+  /* NEW: result bubble for manual mode */
   .manualResult{font-size:14px;margin-left:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="card">
-    <h1>Treino <span class="muted">QUINTA — Mecânica Rápida</span></h1>
+    <h1>Training <span class="muted">THURSDAY — Quick Mechanics</span></h1>
 
     <div class="row" style="margin:6px 0 10px">
-      <button id="nextBtn" title="Atalho: N">Gerar número <span class="kbd">N</span></button>
-      <button id="checkBtn" title="Atalho: Enter">Verificar <span class="kbd">Enter</span></button>
-      <button id="helpBtn" title="Atalho: H">Ajuda <span class="kbd">H</span></button>
+      <button id="nextBtn" title="Shortcut: N">Generate number <span class="kbd">N</span></button>
+      <button id="checkBtn" title="Shortcut: Enter">Check <span class="kbd">Enter</span></button>
+      <button id="helpBtn" title="Shortcut: H">Help <span class="kbd">H</span></button>
 
-      <span class="pill">Intervalo: 
+      <span class="pill">Range: 
         <select id="range">
-          <option value="1-15">1–15 (padrão)</option>
+          <option value="1-15">1–15 (default)</option>
           <option value="15-30">15–30</option>
           <option value="1-30">1–30</option>
           <option value="30-45">30–45</option>
           <option value="45-60">45–60</option>
           <option value="30-60">30–60</option>
           <option value="1-60">1–60</option>
-          <option value="custom">Personalizar…</option>
+          <option value="custom">Custom…</option>
         </select>
       </span>
       <span id="customWrap" class="pill" style="display:none">
@@ -69,92 +69,92 @@
       </span>
 
       <span class="pill">
-        <label><input id="adaptiveCB" type="checkbox" checked style="vertical-align:middle"> Adaptativo</label>
+        <label><input id="adaptiveCB" type="checkbox" checked style="vertical-align:middle"> Adaptive</label>
       </span>
-      <button id="resetBtn" title="Zerar aprendizado">Resetar treino</button>
+      <button id="resetBtn" title="Reset learning">Reset training</button>
     </div>
 
-    <!-- NOVO: modo manual -->
+    <!-- NEW: manual mode -->
     <div class="row" style="margin:0 0 8px">
       <span class="pill">
-        Digitar N:
-        <input id="manualN" type="number" inputmode="numeric" placeholder="ex: 33" style="width:90px;margin-left:6px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px">
+        Enter N:
+        <input id="manualN" type="number" inputmode="numeric" placeholder="e.g. 33" style="width:90px;margin-left:6px;background:#0d1017;border:1px solid #2a3242;color:#e6e6e6;border-radius:8px;padding:6px">
       </span>
-      <button id="analyzeBtn" title="Atalho: Ctrl+Enter">Descobrir lado & tipo</button>
+      <button id="analyzeBtn" title="Shortcut: Ctrl+Enter">Find side & type</button>
       <span id="manualOut" class="manualResult muted">—</span>
     </div>
 
     <div class="big" id="number">—</div>
-    <div class="legend" id="hint">Gere um número e escolha a contagem e o lado. O item de força é sempre o <b>2º da esquerda</b>.</div>
+    <div class="legend" id="hint">Generate a number and choose the counting type and the side. The force item is always the <b>2nd from the left</b>.</div>
 
-    <div class="board" aria-label="linha de 5 itens">
-      <div class="item">1º</div>
-      <div class="item force">2º (força)</div>
-      <div class="item">3º</div>
-      <div class="item">4º</div>
-      <div class="item">5º</div>
+    <div class="board" aria-label="row of 5 items">
+      <div class="item">1st</div>
+      <div class="item force">2nd (force)</div>
+      <div class="item">3rd</div>
+      <div class="item">4th</div>
+      <div class="item">5th</div>
     </div>
 
     <div class="controls">
-      <div class="seg" role="radiogroup" aria-label="Tipo de contagem">
+      <div class="seg" role="radiogroup" aria-label="Counting type">
         <input id="tBasic" name="tipo" type="radio" checked><label for="tBasic">Basic</label>
         <input id="tBounce" name="tipo" type="radio"><label for="tBounce">Bounce</label>
       </div>
-      <div class="seg" role="radiogroup" aria-label="Lado de início">
-        <input id="sLeft" name="side" type="radio" checked><label for="sLeft">Esquerda</label>
-        <input id="sRight" name="side" type="radio"><label for="sRight">Direita</label>
+      <div class="seg" role="radiogroup" aria-label="Starting side">
+        <input id="sLeft" name="side" type="radio" checked><label for="sLeft">Left</label>
+        <input id="sRight" name="side" type="radio"><label for="sRight">Right</label>
       </div>
-      <span class="pill">Passo-a-passo <input id="step" type="checkbox" style="vertical-align:middle"></span>
+      <span class="pill">Step-by-step <input id="step" type="checkbox" style="vertical-align:middle"></span>
     </div>
 
     <div class="feedback" id="feedback"></div>
 
     <div class="stats">
-      <div class="stat">Acertos: <b id="ok">0</b></div>
-      <div class="stat">Erros: <b id="err">0</b></div>
-      <div class="stat">Série: <b id="streak">0</b></div>
-      <div class="stat">Tempo: <b id="timer">0.0s</b></div>
+      <div class="stat">Correct: <b id="ok">0</b></div>
+      <div class="stat">Wrong: <b id="err">0</b></div>
+      <div class="stat">Streak: <b id="streak">0</b></div>
+      <div class="stat">Time: <b id="timer">0.0s</b></div>
     </div>
   </div>
 </div>
 
-<!-- Modal de ajuda (inalterado) -->
+<!-- Help modal -->
 <div class="modal" id="modal">
   <div class="inner">
     <div class="row" style="justify-content:space-between;align-items:center">
-      <h2>Regras rápidas & lembretes</h2>
-      <button id="closeHelp">Fechar</button>
+      <h2>Quick rules & reminders</h2>
+      <button id="closeHelp">Close</button>
     </div>
     <div class="hr"></div>
     <div class="grid2">
       <div>
-        <h3 style="margin:0 0 6px">Coração do método</h3>
+        <h3 style="margin:0 0 6px">Core of the method</h3>
         <div class="legend">
-          • Força 1 item entre 5; o item de força fica em <b>2º da esquerda</b> (fixo).<br>
-          • <b>Tipo:</b> se <b>N é par → Basic</b>; se <b>N é ímpar → Bounce</b>.<br>
-          • <b>Lado (Basic):</b> comece pela <b>esquerda</b> se <code>N ≡ 0 ou 2 (mod 8)</code>, senão pela <b>direita</b>.<br>
-          • <b>Lado (Bounce):</b> use <b>N+1</b> para a mesma regra acima (e conte <i>movimentos</i>).<br>
-          • “Basic” conta <i>pontos</i> 1,2,3,4,5,4,3,2,1…; “Bounce” conta <i>movimentos</i>.
+          • Force 1 item among 5; the force item is always the <b>2nd from the left</b> (fixed).<br>
+          • <b>Type:</b> if <b>N is even → Basic</b>; if <b>N is odd → Bounce</b>.<br>
+          • <b>Side (Basic):</b> start on the <b>left</b> if <code>N ≡ 0 or 2 (mod 8)</code>, otherwise on the <b>right</b>.<br>
+          • <b>Side (Bounce):</b> use <b>N+1</b> with the same rule above (and count <i>moves</i>).<br>
+          • “Basic” counts <i>points</i> 1,2,3,4,5,4,3,2,1…; “Bounce” counts <i>moves</i>.
         </div>
         <div class="hr"></div>
-        <h3 style="margin:0 0 6px">Garantindo par (opcional)</h3>
+        <h3 style="margin:0 0 6px">Ensuring even (optional)</h3>
         <div class="legend">
           • <b>IBO/DBO</b> (increase/decrease by one).<br>
-          • Outros: “tag team”, pareamento/pares, campo de seleção com totais pares etc.
+          • Others: “tag team”, pairing, selection field with even totals, etc.
         </div>
       </div>
       <div>
-        <h3 style="margin:0 0 6px">Dicas</h3>
+        <h3 style="margin:0 0 6px">Tips</h3>
         <div class="legend">
-          • Atalhos: <span class="kbd">N</span>, <span class="kbd">Enter</span>, <span class="kbd">H</span>.<br>
-          • Pense só em <b>N mod 8</b> + <b>paridade</b>.<br>
-          • “Bounce” com uma peça andando (ex.: peão) justifica os movimentos.
+          • Shortcuts: <span class="kbd">N</span>, <span class="kbd">Enter</span>, <span class="kbd">H</span>.<br>
+          • Think only about <b>N mod 8</b> + <b>parity</b>.<br>
+          • “Bounce” with a moving piece (e.g., a pawn) justifies the moves.
         </div>
         <div class="hr"></div>
-        <h3 style="margin:0 0 6px">Exemplo mental</h3>
+        <h3 style="margin:0 0 6px">Mental example</h3>
         <div class="legend">
-          N=22 → Basic; 22 ≡ 6 (mod 8) ⇒ começa <b>Direita</b>.<br>
-          N=33 → Bounce; use 34 ⇒ 34 ≡ 2 (mod 8) ⇒ começa <b>Esquerda</b>.
+          N=22 → Basic; 22 ≡ 6 (mod 8) ⇒ start on the <b>Right</b>.<br>
+          N=33 → Bounce; use 34 ⇒ 34 ≡ 2 (mod 8) ⇒ start on the <b>Left</b>.
         </div>
       </div>
     </div>
@@ -163,7 +163,7 @@
 
 <script>
 (()=> {
-  // ===== util =====
+  // ===== utils =====
   const $ = sel => document.querySelector(sel);
   const numberEl = $('#number'), feedback = $('#feedback');
   const okEl=$('#ok'), errEl=$('#err'), streakEl=$('#streak'), timerEl=$('#timer');
@@ -175,14 +175,14 @@
   const rangeSel=$('#range'), customWrap=$('#customWrap'), minN=$('#minN'), maxN=$('#maxN');
   const adaptiveCB=$('#adaptiveCB');
 
-  // NOVO: refs do modo manual
+  // NEW: manual mode refs
   const manualN = $('#manualN');
   const analyzeBtn = $('#analyzeBtn');
   const manualOut = $('#manualOut');
 
   let N=null, lastN=null, startTime=0, ok=0, err=0, streak=0, locked=false;
 
-  // Pesos por "tipo de caso" (BL, BR, bL, bR)
+  // Weights per "case type" (BL, BR, bL, bR)
   let weights = [1,1,1,1];
 
   function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
@@ -199,7 +199,7 @@
     const [a,b]=rangeSel.value.split('-').map(x=>parseInt(x,10)); return [a,b];
   }
 
-  // ===== Regras QUINTA =====
+  // ===== THURSDAY rules =====
   function correctRule(n){
     const tipo = (n%2===0)? 'basic':'bounce';
     const m = (tipo==='bounce')? n+1 : n;
@@ -214,7 +214,7 @@
     return 3; // bounce+right
   }
 
-  // ===== Geração de N: sem repetição imediata + viés adaptativo =====
+  // ===== Number generation: no immediate repeat + adaptive bias =====
   function sampleBucketAvailable(a, b){
     const seen = new Set();
     for(let i=0;i<400 && seen.size<4;i++){
@@ -251,7 +251,7 @@
     const MAX_TRIES = 400;
     while(tries++ < MAX_TRIES){
       const x = randInt(a,b);
-      if(x === lastN && b>a) continue; // evita repetição imediata
+      if(x === lastN && b>a) continue; // avoid immediate repeat
       if(bucketFromRule(correctRule(x)) === targetBucket){ candidate = x; break; }
     }
     if(candidate===null){
@@ -267,7 +267,7 @@
     locked=false;
   }
 
-  // ===== Simulação / verificação =====
+  // ===== Simulation / verification =====
   function simulate(n, tipo, lado, step=false){
     const target=1;
     let pos = (lado==='left')? 0: 4;
@@ -299,7 +299,7 @@
     return {tipo,lado};
   }
 
-  // ===== Adaptação pelos tempos (FAST ≤3s; SLOW ≥5s) =====
+  // ===== Adaptation by timings (FAST ≤3s; SLOW ≥5s) =====
   function resetLearning(){ weights = [1,1,1,1]; }
 
   function updateAdaptiveWeights(bucket, elapsedSec){
@@ -327,48 +327,48 @@
     const sel = userSelection();
     const sim  = simulate(N, sel.tipo, sel.lado, stepCB.checked);
 
-    const idealTxt = `${ideal.tipo==='basic'?'Basic':'Bounce'} + ${ideal.lado==='left'?'Esq.':'Dir.'}`;
-    const userTxt  = `${sel.tipo==='basic'?'Basic':'Bounce'} + ${sel.lado==='left'?'Esq.':'Dir.'}`;
+    const idealTxt = `${ideal.tipo==='basic'?'Basic':'Bounce'} + ${ideal.lado==='left'?'Left':'Right'}`;
+    const userTxt  = `${sel.tipo==='basic'?'Basic':'Bounce'} + ${sel.lado==='left'?'Left':'Right'}`;
 
     const isRight = sim.hit;
 
     if(isRight){
       ok++; streak++;
-      feedback.innerHTML = `<span class="ok">Correto!</span> <span class="muted">(${userTxt}) — ${elapsed.toFixed(1)}s</span>`;
+      feedback.innerHTML = `<span class="ok">Correct!</span> <span class="muted">(${userTxt}) — ${elapsed.toFixed(1)}s</span>`;
     }else{
       err++; streak=0;
-      feedback.innerHTML = `<span class="err">Errou.</span> <span class="muted">Você escolheu ${userTxt}. Ideal: <b>${idealTxt}</b>. — ${elapsed.toFixed(1)}s</span>`;
+      feedback.innerHTML = `<span class="err">Wrong.</span> <span class="muted">You chose ${userTxt}. Ideal: <b>${idealTxt}</b>. — ${elapsed.toFixed(1)}s</span>`;
     }
 
     if(stepCB.checked && sim.log.length){
       const path = sim.log.map(s=>s.pos+1).join(' → ');
-      feedback.innerHTML += `<div class="muted" style="margin-top:6px">Trajeto: ${path}</div>`;
+      feedback.innerHTML += `<div class="muted" style="margin-top:6px">Path: ${path}</div>`;
     }
 
     okEl.textContent=ok; errEl.textContent=err; streakEl.textContent=streak;
 
-    // atualiza aprendizado para o bucket deste N
+    // update learning for this N's bucket
     const bucket = bucketFromRule(ideal);
     updateAdaptiveWeights(bucket, elapsed);
   }
 
-  // ===== NOVO: análise manual =====
+  // ===== NEW: manual analysis =====
   function analyzeManual(){
     const raw = manualN.value.trim();
     if(!raw){ manualOut.textContent='—'; return; }
     const n = Number(raw);
     if(!Number.isFinite(n) || !Number.isInteger(n) || n<=0){
-      manualOut.innerHTML = `<span class="err">Digite um inteiro positivo.</span>`;
+      manualOut.innerHTML = `<span class="err">Enter a positive integer.</span>`;
       return;
     }
     const rule = correctRule(n);
-    // refletir nos botões
+    // reflect on the buttons
     (rule.tipo==='basic'? tBasic : tBounce).checked = true;
     (rule.lado==='left'? sLeft : sRight).checked = true;
-    // texto curto
+    // short text
     const tipoTxt = rule.tipo==='basic' ? 'Basic' : 'Bounce';
-    const ladoTxt = rule.lado==='left' ? 'Esquerda' : 'Direita';
-    manualOut.innerHTML = `<span class="ok">${tipoTxt} + ${ladoTxt}</span> <span class="muted">(N=${n}${rule.tipo==='bounce'?', usa N+1='+(rule.m):''}; mod8=${rule.r})</span>`;
+    const ladoTxt = rule.lado==='left' ? 'Left' : 'Right';
+    manualOut.innerHTML = `<span class="ok">${tipoTxt} + ${ladoTxt}</span> <span class="muted">(N=${n}${rule.tipo==='bounce'?', use N+1='+(rule.m):''}; mod8=${rule.r})</span>`;
   }
 
   // ===== events =====
@@ -383,19 +383,19 @@
     resetLearning();
   });
 
-  // atalhos
+  // shortcuts
   document.addEventListener('keydown', (e)=>{
     const k = e.key.toLowerCase();
     if(k==='n'){ newNumber(); }
-    else if(e.key==='Enter' && !e.ctrlKey){ verify(); }      // Enter → verificar número gerado
-    else if(e.key==='enter' && e.ctrlKey) { analyzeManual(); } // não funciona assim; fallback abaixo
+    else if(e.key==='Enter' && !e.ctrlKey){ verify(); }      // Enter → check generated number
+    else if(e.key==='enter' && e.ctrlKey) { analyzeManual(); } // doesn't work like this; fallback below
     else if(k==='h'){ modal.style.display='grid'; }
   });
-  // Enter dentro do input manual → analisar
+  // Enter inside manual input → analyze
   manualN.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ analyzeManual(); } });
   analyzeBtn.addEventListener('click', analyzeManual);
 
-  // inicial
+  // init
   resetLearning();
   newNumber();
 })();
