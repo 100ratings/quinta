@@ -37,7 +37,6 @@
   .legend b{color:#cfd8ea}
   .hr{height:1px;background:#2a3242;margin:12px 0}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  /* NEW: result bubble for manual mode */
   .manualResult{font-size:14px;margin-left:4px}
 </style>
 </head>
@@ -50,12 +49,12 @@
       <button id="nextBtn" title="Shortcut: N">Generate number <span class="kbd">N</span></button>
       <button id="checkBtn" title="Shortcut: Enter">Check <span class="kbd">Enter</span></button>
       <button id="helpBtn" title="Shortcut: H">Help <span class="kbd">H</span></button>
-      <!-- NEW: Quick Start button -->
       <button id="qsBtn" title="Shortcut: Q">Quick Start Guide <span class="kbd">Q</span></button>
 
       <span class="pill">Range: 
         <select id="range">
-          <option value="1-15">1–15 (default)</option>
+          <option value="1-40" selected>1–40 (default)</option>
+          <option value="1-15">1–15</option>
           <option value="15-30">15–30</option>
           <option value="1-30">1–30</option>
           <option value="30-45">30–45</option>
@@ -76,7 +75,6 @@
       <button id="resetBtn" title="Reset learning">Reset training</button>
     </div>
 
-    <!-- NEW: manual mode -->
     <div class="row" style="margin:0 0 8px">
       <span class="pill">
         Enter N:
@@ -133,24 +131,17 @@
         <h3 style="margin:0 0 6px">Core of the method</h3>
         <div class="legend">
           • Force 1 item among 5; the force item is always the <b>2nd from the left</b> (fixed).<br>
-          • <b>Type:</b> if <b>N is even → Basic</b>; if <b>N is odd → Bounce</b>.<br>
+          • <b>Type:</b> even <i>N</i> → <b>Basic</b>; odd <i>N</i> → <b>Bounce</b>.<br>
           • <b>Side (Basic):</b> start on the <b>left</b> if <code>N ≡ 0 or 2 (mod 8)</code>, otherwise on the <b>right</b>.<br>
-          • <b>Side (Bounce):</b> use <b>N+1</b> with the same rule above (and count <i>moves</i>).<br>
+          • <b>Side (Bounce):</b> use <b>N+1</b> with the same rule (and count <i>moves</i>).<br>
           • “Basic” counts <i>points</i> 1,2,3,4,5,4,3,2,1…; “Bounce” counts <i>moves</i>.
         </div>
         <div class="hr"></div>
-        <h3 style="margin:0 0 6px">Ensuring even (optional)</h3>
-        <div class="legend">
-          • <b>IBO/DBO</b> (increase/decrease by one).<br>
-          • Others: “tag team”, pairing, selection field with even totals, etc.
-        </div>
-      </div>
-      <div>
         <h3 style="margin:0 0 6px">Tips</h3>
         <div class="legend">
-          • Shortcuts: <span class="kbd">N</span>, <span class="kbd">Enter</span>, <span class="kbd">H</span>.<br>
-          • Think only about <b>N mod 8</b> + <b>parity</b>.<br>
-          • “Bounce” with a moving piece (e.g., a pawn) justifies the moves.
+          • Shortcuts: <span class="kbd">N</span> Generate • <span class="kbd">Enter</span> Check • <span class="kbd">H</span> Help • <span class="kbd">Q</span> Quick Start.<br>
+          • New: <span class="kbd">↑/↓</span> or <span class="kbd">W/S</span> → Basic/Bounce • <span class="kbd">←/→</span> or <span class="kbd">A/D</span> → Left/Right • <span class="kbd">Space</span> toggles type.<br>
+          • <b>Auto-advance:</b> when correct, the next number is generated automatically; when wrong, nothing changes until you decide.
         </div>
         <div class="hr"></div>
         <h3 style="margin:0 0 6px">Mental example</h3>
@@ -159,11 +150,32 @@
           N=33 → Bounce; use 34 ⇒ 34 ≡ 2 (mod 8) ⇒ start on the <b>Left</b>.
         </div>
       </div>
+
+      <div>
+        <h3 style="margin:0 0 6px">Cheat-sheet</h3>
+        <div class="legend">
+          <b>Type:</b> even N → Basic; odd N → Bounce. <br/>
+          <b>Side (Basic):</b> start <b>Left</b> if N ≡ 0 or 2 (mod 8); otherwise <b>Right</b>. <br/>
+          <b>Side (Bounce):</b> use <b>N+1</b> with the same rule. <br/>
+          <b>Shortcuts:</b> <span class="kbd">N</span> • <span class="kbd">Enter</span> • <span class="kbd">Ctrl+Enter</span> Analyze N • <span class="kbd">H</span> • <span class="kbd">Q</span> •
+          <span class="kbd">↑/↓</span>/<span class="kbd">W/S</span> Type • <span class="kbd">←/→</span>/<span class="kbd">A/D</span> Side • <span class="kbd">Space</span> Toggle Type • <b>Auto-advance on correct</b>.
+        </div>
+
+        <div class="hr"></div>
+        <h3 style="margin:0 0 6px">About the book</h3>
+        <div class="legend">
+          If you want to really understand how QUINTA works in depth, get the book 
+          <i>Quinta: A Miracle in Five Parts</i> here: 
+          <a href="https://phillsmithcreative.com/collections/books/products/quinta-book" target="_blank">
+            official link
+          </a>.
+        </div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- NEW: Quick Start Guide modal -->
+<!-- Quick Start Guide modal -->
 <div class="modal" id="qsModal">
   <div class="inner">
     <div class="row" style="justify-content:space-between;align-items:center">
@@ -183,19 +195,19 @@
         <div class="hr"></div>
         <h3 style="margin:0 0 6px">How to use (2-minute flow)</h3>
         <ol class="legend" style="padding-left:18px">
-          <li>Pick a <b>Range</b> (or set a <b>Custom</b> min/max). Leave <b>Adaptive</b> on to get more of what you miss.</li>
-          <li>Press <b>Generate number</b> (<span class="kbd">N</span>) or type a value in <b>Enter N</b> and click <b>Find side &amp; type</b>.</li>
-          <li>Decide the <b>Counting Type</b>: even → <b>Basic</b>, odd → <b>Bounce</b>.</li>
-          <li>Decide the <b>Starting Side</b> using the mod-8 rule (see notes below).</li>
-          <li>(Optional) Toggle <b>Step-by-step</b> to visualize the walk.</li>
-          <li>Click <b>Check</b> (<span class="kbd">Enter</span>) to validate. The app tracks <b>Correct/Wrong/Streak/Time</b>.</li>
-          <li>Use <b>Reset training</b> to clear stats and adaptive weights.</li>
+          <li>Pick a <b>Range</b> (or set a <b>Custom</b> min/max). Leave <b>Adaptive</b> on.</li>
+          <li>Press <b>Generate number</b> (<span class="kbd">N</span>) or type in <b>Enter N</b> and click <b>Find side &amp; type</b>.</li>
+          <li>Choose <b>Type</b>: even → <b>Basic</b>, odd → <b>Bounce</b>.</li>
+          <li>Choose <b>Side</b> via the mod-8 rule.</li>
+          <li>(Optional) Toggle <b>Step-by-step</b> to visualize.</li>
+          <li>Hit <b>Check</b> (<span class="kbd">Enter</span>). If correct, a new number appears automatically; if wrong, revise and tente novamente.</li>
+          <li>Use <b>Reset training</b> to clear stats and weights.</li>
         </ol>
 
         <div class="hr"></div>
         <h3 style="margin:0 0 6px">Manual mode</h3>
         <div class="legend">
-          Type any <b>N</b> in <i>Enter N</i> and hit <b>Find side &amp; type</b>. The tool shows the correct <b>Type</b> and <b>Side</b> instantly.
+          Type any <b>N</b> and click <b>Find side &amp; type</b> (or <span class="kbd">Ctrl+Enter</span>).
         </div>
       </div>
 
@@ -203,9 +215,10 @@
         <h3 style="margin:0 0 6px">Cheat-sheet</h3>
         <div class="legend">
           <b>Type:</b> even N → Basic; odd N → Bounce. <br/>
-          <b>Side (Basic):</b> start <b>Left</b> if N ≡ 0 or 2 (mod 8); otherwise <b>Right</b>. <br/>
-          <b>Side (Bounce):</b> use <b>N+1</b> with the same rule (and count <i>moves</i>). <br/>
-          <b>Shortcuts:</b> <span class="kbd">N</span> Generate • <span class="kbd">Enter</span> Check • <span class="kbd">Ctrl+Enter</span> Analyze N • <span class="kbd">H</span> Help • <span class="kbd">Q</span> Quick Start
+          <b>Side (Basic):</b> Left if N ≡ 0 or 2 (mod 8); else Right. <br/>
+          <b>Side (Bounce):</b> use N+1. <br/>
+          <b>Shortcuts:</b> <span class="kbd">N</span> Generate • <span class="kbd">Enter</span> Check • <span class="kbd">Ctrl+Enter</span> Analyze N • <span class="kbd">H</span> Help • <span class="kbd">Q</span> Quick Start •
+          <span class="kbd">↑/↓</span> or <span class="kbd">W/S</span> Type • <span class="kbd">←/→</span> or <span class="kbd">A/D</span> Side • <span class="kbd">Space</span> Toggle Type • <b>Auto-advance on correct</b>.
         </div>
       </div>
     </div>
@@ -226,12 +239,10 @@
   const rangeSel=$('#range'), customWrap=$('#customWrap'), minN=$('#minN'), maxN=$('#maxN');
   const adaptiveCB=$('#adaptiveCB');
 
-  // NEW: manual mode refs
   const manualN = $('#manualN');
   const analyzeBtn = $('#analyzeBtn');
   const manualOut = $('#manualOut');
 
-  // NEW: Quick Start refs
   const qsBtn = $('#qsBtn');
   const qsModal = $('#qsModal');
   const closeQS = $('#closeQS');
@@ -307,7 +318,7 @@
     const MAX_TRIES = 400;
     while(tries++ < MAX_TRIES){
       const x = randInt(a,b);
-      if(x === lastN && b>a) continue; // avoid immediate repeat
+      if(x === lastN && b>a) continue;
       if(bucketFromRule(correctRule(x)) === targetBucket){ candidate = x; break; }
     }
     if(candidate===null){
@@ -391,9 +402,12 @@
     if(isRight){
       ok++; streak++;
       feedback.innerHTML = `<span class="ok">Correct!</span> <span class="muted">(${userTxt}) — ${elapsed.toFixed(1)}s</span>`;
+      // NEW: auto-advance on correct (small delay so you can see the feedback)
+      setTimeout(()=>{ newNumber(); }, 500);
     }else{
       err++; streak=0;
       feedback.innerHTML = `<span class="err">Wrong.</span> <span class="muted">You chose ${userTxt}. Ideal: <b>${idealTxt}</b>. — ${elapsed.toFixed(1)}s</span>`;
+      // keep number; user decides next action
     }
 
     if(stepCB.checked && sim.log.length){
@@ -403,7 +417,6 @@
 
     okEl.textContent=ok; errEl.textContent=err; streakEl.textContent=streak;
 
-    // update learning for this N's bucket
     const bucket = bucketFromRule(ideal);
     updateAdaptiveWeights(bucket, elapsed);
   }
@@ -418,10 +431,8 @@
       return;
     }
     const rule = correctRule(n);
-    // reflect on the buttons
     (rule.tipo==='basic'? tBasic : tBounce).checked = true;
     (rule.lado==='left'? sLeft : sRight).checked = true;
-    // short text
     const tipoTxt = rule.tipo==='basic' ? 'Basic' : 'Bounce';
     const ladoTxt = rule.lado==='left' ? 'Left' : 'Right';
     manualOut.innerHTML = `<span class="ok">${tipoTxt} + ${ladoTxt}</span> <span class="muted">(N=${n}${rule.tipo==='bounce'?', use N+1='+(rule.m):''}; mod8=${rule.r})</span>`;
@@ -432,7 +443,6 @@
   checkBtn.addEventListener('click', verify);
   helpBtn.addEventListener('click', ()=> modal.style.display='grid');
   closeHelp.addEventListener('click', ()=> modal.style.display='none');
-  // NEW: quick start events
   qsBtn.addEventListener('click', ()=> qsModal.style.display='grid');
   closeQS.addEventListener('click', ()=> qsModal.style.display='none');
 
@@ -443,20 +453,31 @@
     resetLearning();
   });
 
-  // shortcuts
+  // shortcuts (inclui setas/WASD/espaço)
   document.addEventListener('keydown', (e)=>{
-    const k = e.key.toLowerCase();
-    if(k==='n'){ newNumber(); }
-    else if(e.key==='Enter' && !e.ctrlKey){ verify(); }      // Enter → check generated number
-    else if(e.key==='enter' && e.ctrlKey) { analyzeManual(); } // doesn't work like this; fallback below
-    else if(k==='h'){ modal.style.display='grid'; }
-    else if(k==='q'){ qsModal.style.display='grid'; }          // NEW: Q opens Quick Start
+    const kRaw = e.key || '';
+    const k = kRaw.toLowerCase();
+
+    if(k==='n'){ e.preventDefault(); newNumber(); return; }
+    if(kRaw==='Enter' && !e.ctrlKey){ e.preventDefault(); verify(); return; }
+    if(kRaw==='Enter' && e.ctrlKey){ e.preventDefault(); analyzeManual(); return; }
+    if(k==='h'){ e.preventDefault(); modal.style.display='grid'; return; }
+    if(k==='q'){ e.preventDefault(); qsModal.style.display='grid'; return; }
+
+    const el = document.activeElement;
+    const isEditable = (el && (el.tagName==='INPUT' || el.tagName==='TEXTAREA' || el.isContentEditable || el.tagName==='SELECT'));
+    if(isEditable) return;
+
+    if(['arrowup','w'].includes(k)){ e.preventDefault(); tBasic.checked = true; return; }
+    if(['arrowdown','s'].includes(k)){ e.preventDefault(); tBounce.checked = true; return; }
+    if(['arrowleft','a'].includes(k)){ e.preventDefault(); sLeft.checked = true; return; }
+    if(['arrowright','d'].includes(k)){ e.preventDefault(); sRight.checked = true; return; }
+    if(k===' ' || k==='spacebar'){ e.preventDefault(); (tBasic.checked ? tBounce : tBasic).checked = true; return; }
   });
-  // Enter inside manual input → analyze
-  manualN.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ analyzeManual(); } });
+
+  manualN.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); analyzeManual(); } });
   analyzeBtn.addEventListener('click', analyzeManual);
 
-  // init
   resetLearning();
   newNumber();
 })();
