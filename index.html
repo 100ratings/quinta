@@ -519,7 +519,24 @@
     var dict;
     var map={
       'en':{title:function(n){return n+' reps!';}, msg:"You're good enough — go practice in the real world."},
-      'pt':{title:function(n){return n+' repetições!';}, msg:'Você já é bom o suficiente — vá praticar no mundo real.'},
+      'pt':{
+        title: function(n){ return n + ' acertos!'; },
+        msg: function(n){
+          var phrases = [
+            "Incrível! Você está dominando!",
+            "Excelente trabalho! Sua mente está afiada!",
+            "Impressionante! Sua consistência é a chave!",
+            "Uau! Você é imparável!",
+            "Parabéns! Mantenha o foco!",
+            "Fantástico! Sua dedicação está valendo a pena!",
+            "Espetacular! Cada acerto te deixa mais forte!",
+            "Genial! Você está no caminho certo!",
+            "Brilhante! Sua mente está voando!",
+            "Você já é bom o suficiente — vá praticar no mundo real."
+          ];
+          return phrases[Math.floor(Math.random() * phrases.length)];
+        }
+      },
       'es':{title:function(n){return '¡'+n+' repeticiones!';}, msg:'Ya eres lo bastante bueno — sal a practicar en el mundo real.'},
       'fr':{title:function(n){return n+' répétitions !';}, msg:"Tu es déjà assez bon — va t'exercer dans le monde réel."},
       'de':{title:function(n){return n+' Wiederholungen!';}, msg:'Du bist gut genug – übe jetzt in der echten Welt.'},
@@ -572,18 +589,18 @@
   var lastEggMilestone = Number(localStorage.getItem('q_lastEggMilestone') || '0');
 
   function checkEasterEgg(){
-    var total = ok + err;
-    var milestone = Math.floor(total / EGG_EVERY) * EGG_EVERY;
-    if (milestone > 0 && total % EGG_EVERY === 0 && milestone !== lastEggMilestone){
+    var milestone = Math.floor(ok / EGG_EVERY) * EGG_EVERY;
+    if (milestone > 0 && ok % EGG_EVERY === 0 && milestone !== lastEggMilestone){
       lastEggMilestone = milestone;
       localStorage.setItem('q_lastEggMilestone', String(lastEggMilestone));
       var lang = getActiveLang();
       var obj = milestoneStringsFor(lang, milestone);
       if (eggTitle) eggTitle.textContent = obj.title;
-      if (eggMsg)   eggMsg.textContent   = obj.msg;
+      if (eggMsg)   eggMsg.textContent   = (typeof obj.msg === 'function') ? obj.msg(milestone) : obj.msg;
       if(eggModal) eggModal.style.display='grid';
       // Falar sempre (force=true)
-      speakText(obj.title + ' ' + obj.msg, true);
+      var msgText = (typeof obj.msg === 'function') ? obj.msg(milestone) : obj.msg;
+      speakText(obj.title + ' ' + msgText, true);
       return true;
     }
     return false;
