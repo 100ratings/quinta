@@ -1,0 +1,30 @@
+<!-- Favicon links -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+
+// Motivational phrases
+var motivationalPhrases = [
+  "Incrível! Você está dominando!",
+  "Excelente trabalho! Continue assim!",
+  "Impressionante! Sua consistência é a chave!",
+  "Uau! Você é imparável!",
+  "Parabéns! Mantenha o foco!",
+  "Fantástico! Sua dedicação está valendo a pena!",
+  "Mandou bem! A prática leva à perfeição!",
+  "Espetacular! Cada acerto te deixa mais forte!",
+  "Genial! Você está no caminho certo!",
+  "Brilhante! Sua mente está afiada!"
+];
+
+// New state variable
+var consecutiveCorrects = 0;
+
+// Function to display motivational phrase
+function displayMotivationalPhrase() {
+  if (consecutiveCorrects >= 30 && consecutiveCorrects <= 35) {
+    var randomIndex = Math.floor(Math.random() * motivationalPhrases.length);
+    feedback.innerHTML = '<span class="ok">' + motivationalPhrases[randomIndex] + '</span>';
+  }
+}
