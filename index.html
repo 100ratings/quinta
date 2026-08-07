@@ -333,9 +333,48 @@
   var N=null,lastN=null,startTime=0,ok=0,err=0,locked=false;
   var weights=[1,1,1,1]; // BL, BR, bL, bR
 
-  // thresholds
-  var fastThreshold = Number(localStorage.getItem('q_fastTh') || '3.0');
-  var slowThreshold = Number(localStorage.getItem('q_slowTh') || '5.0');
+  // ===== local persistence =====
+  // Preferences are kept in this browser/device. Clearing site data removes them.
+  var SETTINGS_KEY='quinta_settings_v1';
+  var savedSettings={};
+  try{
+    savedSettings=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'{}')||{};
+  }catch(e){ savedSettings={}; }
+
+  // thresholds (legacy keys are supported for backward compatibility)
+  var fastThreshold = Number(savedSettings.fastThreshold || localStorage.getItem('q_fastTh') || '3.0');
+  var slowThreshold = Number(savedSettings.slowThreshold || localStorage.getItem('q_slowTh') || '5.0');
+
+  function saveSettings(){
+    try{
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+        range:rangeSel.value, minN:minN.value, maxN:maxN.value,
+        adaptive:adaptiveCB.checked, fast:fastCB.checked, tts:ttsCB.checked,
+        errTts:errTtsCB.checked, voice:voiceSel.value,
+        type:tBasic.checked?'basic':'bounce', side:sLeft.checked?'left':'right',
+        step:stepCB.checked, fastThreshold:fastThreshold, slowThreshold:slowThreshold,
+        ok:ok, err:err, weights:weights, lastEggMilestone:lastEggMilestone
+      }));
+    }catch(e){}
+  }
+
+  function restoreSettings(){
+    var s=savedSettings;
+    if(s.range && Array.prototype.some.call(rangeSel.options,function(o){return o.value===s.range;})) rangeSel.value=s.range;
+    if(typeof s.minN==='string') minN.value=s.minN;
+    if(typeof s.maxN==='string') maxN.value=s.maxN;
+    if(typeof s.adaptive==='boolean') adaptiveCB.checked=s.adaptive;
+    if(typeof s.fast==='boolean') fastCB.checked=s.fast;
+    if(typeof s.tts==='boolean') ttsCB.checked=s.tts;
+    if(typeof s.errTts==='boolean') errTtsCB.checked=s.errTts;
+    if(s.type==='bounce'||s.type==='basic'){ tBasic.checked=s.type==='basic'; tBounce.checked=s.type==='bounce'; }
+    if(s.side==='right'||s.side==='left'){ sLeft.checked=s.side==='left'; sRight.checked=s.side==='right'; }
+    if(typeof s.step==='boolean') stepCB.checked=s.step;
+    if(Array.isArray(s.weights) && s.weights.length===4 && s.weights.every(function(v){return Number.isFinite(Number(v));})) weights=s.weights.map(Number);
+    if(Number.isFinite(Number(s.ok))) ok=Math.max(0,Number(s.ok));
+    if(Number.isFinite(Number(s.err))) err=Math.max(0,Number(s.err));
+  }
+  restoreSettings();
 
   function updateTimeLegend(){
     if(timeLegend){
@@ -421,7 +460,7 @@
     return null;
   }
   function populateVoiceSelect(){
-    var prev=voiceSel.value;
+    var prev=voiceSel.value || savedSettings.voice || '';
     voiceSel.innerHTML='<option value="">Auto (by language)</option>';
     var byKey={};
     function pickScore(v){ var uri=(v.voiceURI||'').toLowerCase(); var s=0; if(v.localService) s+=1; if(/premium|enhanced|siri/.test(uri)) s+=2; return s; }
@@ -586,7 +625,7 @@
 
   // ===== Easter egg (every 100) =====
   var EGG_EVERY = 100;
-  var lastEggMilestone = Number(localStorage.getItem('q_lastEggMilestone') || '0');
+  var lastEggMilestone = Number(savedSettings.lastEggMilestone || localStorage.getItem('q_lastEggMilestone') || '0');
 
   function checkEasterEgg(){
     var milestone = Math.floor(ok / EGG_EVERY) * EGG_EVERY;
@@ -654,6 +693,7 @@
     }
     okEl.textContent=ok; errEl.textContent=err;
     updateAdaptiveWeights(bucketFromRule(ideal), elapsed);
+    saveSettings();
 
     var egg = checkEasterEgg();
     if(!egg && sim.hit){ setTimeout(newNumber,500); }
@@ -676,6 +716,7 @@
     }
     okEl.textContent=ok; errEl.textContent=err;
     updateAdaptiveWeights(bucketFromRule(ideal), elapsed);
+    saveSettings();
 
     var egg = checkEasterEgg();
     if(!egg && isRight){ setTimeout(newNumber,350); }
@@ -692,13 +733,18 @@
   qsBtn.addEventListener('click', function(){ if(qsModal) qsModal.style.display='grid'; });
   closeQS.addEventListener('click', function(){ if(qsModal) qsModal.style.display='none'; });
 
-  rangeSel.addEventListener('change', function(){ show(customWrap, rangeSel.value==='custom'); });
+  rangeSel.addEventListener('change', function(){ show(customWrap, rangeSel.value==='custom'); saveSettings(); });
+  [minN,maxN,adaptiveCB,fastCB,ttsCB,errTtsCB,voiceSel,tBasic,tBounce,sLeft,sRight,stepCB].forEach(function(el){
+    el.addEventListener('change', saveSettings);
+    if(el.tagName==='INPUT' && el.type==='number') el.addEventListener('input', saveSettings);
+  });
   resetBtn.addEventListener('click', function(){
     ok=0; err=0; okEl.textContent=0; errEl.textContent=0;
     lastN=null; feedback.textContent=''; manualOut.textContent='—'; manualN.value='';
     weights=[1,1,1,1];
     localStorage.removeItem('q_lastEggMilestone');
     lastEggMilestone = 0;
+    saveSettings();
     newNumber();
   });
 
@@ -803,15 +849,20 @@
     localStorage.removeItem('q_lastEggMilestone');
     lastEggMilestone = 0;
     if(eggModal) eggModal.style.display='none';
+    saveSettings();
     newNumber();
   });
 
   // init
   function init(){
     updateTimeLegend();
+    show(customWrap, rangeSel.value==='custom');
     syncFastModeUI();
     syncAdaptiveUI();
+    okEl.textContent=ok;
+    errEl.textContent=err;
     newNumber();
+    saveSettings();
   }
   init();
 
