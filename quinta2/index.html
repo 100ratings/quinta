@@ -9,18 +9,17 @@
   <meta name="apple-mobile-web-app-title" content="QUINTA 2">
   <meta name="description" content="QUINTA 2, training for the five-item force">
   <title>QUINTA 2</title>
-  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
-  <link rel="apple-touch-icon" href="../apple-touch-icon.png">
-  <link rel="manifest" href="./site.webmanifest">
-  <link rel="stylesheet" href="./styles.css?v=2.0.2">
-  <script src="./app.js?v=2.0.2" defer></script>
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=2.0.3">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2.0.3">
+  <link rel="manifest" href="./site.webmanifest?v=2.0.3">
+  <link rel="stylesheet" href="./styles.css?v=2.0.3">
+  <script src="./app.js?v=2.0.3" defer></script>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
       <div class="brand">
-        <div class="brand-mark" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+        <img class="brand-mark" src="./icon-192.png?v=2.0.3" alt="" width="39" height="39">
         <div class="brand-copy"><strong>QUINTA 2</strong><small data-i18n="subtitle">TREINAMENTO</small></div>
       </div>
       <div class="top-actions">
@@ -44,16 +43,16 @@
       </div>
       <p id="hint" class="section-caption" data-i18n="tapHint">Escolha o lado inicial</p>
       <div class="five-grid" id="board" aria-label="Five positions">
-        <button class="tile side" data-idx="0" data-i18n-aria="leftTile" type="button"><span class="digit">1</span><small data-i18n="start">INÍCIO</small></button>
+        <button class="tile side" data-idx="0" data-i18n-aria="leftTile" type="button"><span class="digit">1</span></button>
         <button class="tile force" data-idx="1" type="button" disabled><span class="digit">2</span><small>Force</small></button>
         <button class="tile" data-idx="2" type="button" disabled><span class="digit">3</span></button>
         <button class="tile" data-idx="3" type="button" disabled><span class="digit">4</span></button>
-        <button class="tile side" data-idx="4" data-i18n-aria="rightTile" type="button"><span class="digit">5</span><small data-i18n="start">INÍCIO</small></button>
+        <button class="tile side" data-idx="4" data-i18n-aria="rightTile" type="button"><span class="digit">5</span></button>
       </div>
 
       <div id="fastPanel" class="direction-row">
         <button type="button" class="direction" id="leftBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12H4m7-7-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="left">Esquerda</span></button>
-        <button type="button" class="direction" id="rightBtn"><span data-i18n="right">Direita</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-7-7 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button type="button" class="direction" id="rightBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h16m-7-7 7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-i18n="right">Direita</span></button>
       </div>
 
       <div id="traditionalPanel" class="advanced" hidden>
