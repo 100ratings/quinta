@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.0.1";
+  const VERSION = "2.0.2";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -421,7 +421,6 @@
   }
   function updateVersionUI(status) {
     $("#versionText").textContent="v"+VERSION;
-    $("#footerVersion").textContent="QUINTA 2 · v"+VERSION;
     const available=remoteVersion && compareVersions(remoteVersion,VERSION)>0;
     $("#updateBtn").disabled=!available;
     $("#updateState").textContent=status ? t(status) : t(available?"updateAvailable":"upToDate");
