@@ -13,8 +13,8 @@
   <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png">
   <link rel="apple-touch-icon" href="../apple-touch-icon.png">
   <link rel="manifest" href="./site.webmanifest">
-  <link rel="stylesheet" href="./styles.css?v=2.0.0">
-  <script src="./app.js?v=2.0.0" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=2.0.1">
+  <script src="./app.js?v=2.0.1" defer></script>
 </head>
 <body>
   <main class="app">
@@ -36,20 +36,19 @@
 
     <section class="card" aria-label="Training">
       <div class="mode-line">
-        <span class="eyebrow" data-i18n="training">TREINAMENTO</span>
         <span class="mode-pill" id="modeBadge">Fast Tap</span>
       </div>
       <div class="number-wrap">
         <div id="number" aria-live="off">33</div>
         <p class="number-caption" data-i18n="currentNumber">NÚMERO ATUAL</p>
       </div>
-      <p id="hint" class="section-caption" data-i18n="tapHint">Toque no 1 ou 5, ou use os botões abaixo</p>
+      <p id="hint" class="section-caption" data-i18n="tapHint">Escolha o lado inicial</p>
       <div class="five-grid" id="board" aria-label="Five positions">
-        <button class="tile side" data-idx="0" type="button"><span class="digit">1</span><small data-i18n="start">INÍCIO</small></button>
+        <button class="tile side" data-idx="0" data-i18n-aria="leftTile" type="button"><span class="digit">1</span><small data-i18n="start">INÍCIO</small></button>
         <button class="tile force" data-idx="1" type="button" disabled><span class="digit">2</span><small>Force</small></button>
         <button class="tile" data-idx="2" type="button" disabled><span class="digit">3</span></button>
         <button class="tile" data-idx="3" type="button" disabled><span class="digit">4</span></button>
-        <button class="tile side" data-idx="4" type="button"><span class="digit">5</span><small data-i18n="start">INÍCIO</small></button>
+        <button class="tile side" data-idx="4" data-i18n-aria="rightTile" type="button"><span class="digit">5</span><small data-i18n="start">INÍCIO</small></button>
       </div>
 
       <div id="fastPanel" class="direction-row">
