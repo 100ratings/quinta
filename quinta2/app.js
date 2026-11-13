@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.0.0";
+  const VERSION = "2.0.1";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -9,7 +9,7 @@
   const messages = {
     pt: {
       subtitle:"TREINAMENTO",language:"Idioma",settings:"Configurações",training:"TREINAMENTO",
-      currentNumber:"NÚMERO ATUAL",tapHint:"Toque no 1 ou 5, ou use os botões abaixo",
+      currentNumber:"NÚMERO ATUAL",tapHint:"Escolha o lado inicial",leftTile:"1, começar pela esquerda",rightTile:"5, começar pela direita",
       traditionalHint:"Escolha o tipo de contagem e o lado inicial",start:"INÍCIO",
       left:"Esquerda",right:"Direita",countingType:"TIPO DE CONTAGEM",
       startingSide:"LADO INICIAL",check:"Verificar resposta",newNumber:"Novo número",
@@ -38,7 +38,7 @@
     },
     en: {
       subtitle:"TRAINING",language:"Language",settings:"Settings",training:"TRAINING",
-      currentNumber:"CURRENT NUMBER",tapHint:"Tap 1 or 5, or use the buttons below",
+      currentNumber:"CURRENT NUMBER",tapHint:"Choose your starting side",leftTile:"1, start from the left",rightTile:"5, start from the right",
       traditionalHint:"Choose the counting type and starting side",start:"START",
       left:"Left",right:"Right",countingType:"COUNTING TYPE",
       startingSide:"STARTING SIDE",check:"Check answer",newNumber:"New number",
