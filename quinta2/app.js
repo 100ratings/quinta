@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.0.4";
+  const VERSION = "2.0.5";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -230,7 +230,7 @@
   }
   function markActive(side) {
     if(activeFlashTimeout!==null) {clearTimeout(activeFlashTimeout);activeFlashTimeout=null;}
-    $(".tile.side").forEach(el=>el.dataset.active=String(el.dataset.idx===(side==="left"?"0":"4")));
+    $$(".tile.side").forEach(el=>el.dataset.active=String(el.dataset.idx===(side==="left"?"0":"4")));
     $("#leftBtn").dataset.active=String(side==="left");
     $("#rightBtn").dataset.active=String(side==="right");
     // Keep the visual flash identical on both sides, independent of correctness
