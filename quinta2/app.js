@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.0.3";
+  const VERSION = "2.0.4";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -95,6 +95,7 @@
 
   let N = null, lastN = null, locked = false, startTime = 0, elapsedStop = null;
   let pendingNext = null, feedbackInfo = null, remoteVersion = null, voices = [];
+  let activeFlashTimeout = null;
   let focusedBeforeModal = null;
 
   function language() {
@@ -228,9 +229,12 @@
     requestAnimationFrame(updateTimer);
   }
   function markActive(side) {
-    $$(".tile.side").forEach(el=>el.dataset.active=String(el.dataset.idx===(side==="left"?"0":"4")));
+    if(activeFlashTimeout!==null) {clearTimeout(activeFlashTimeout);activeFlashTimeout=null;}
+    $(".tile.side").forEach(el=>el.dataset.active=String(el.dataset.idx===(side==="left"?"0":"4")));
     $("#leftBtn").dataset.active=String(side==="left");
     $("#rightBtn").dataset.active=String(side==="right");
+    // Keep the visual flash identical on both sides, independent of correctness
+    activeFlashTimeout=setTimeout(()=>{clearActive();activeFlashTimeout=null;},240);
   }
   function clearActive() {
     $$(".tile.side,.direction").forEach(el=>el.dataset.active="false");
@@ -289,6 +293,7 @@
 
   function newNumber() {
     if(pendingNext!==null) {clearTimeout(pendingNext);pendingNext=null;}
+    if(activeFlashTimeout!==null) {clearTimeout(activeFlashTimeout);activeFlashTimeout=null;}
     const [a,b]=currentRange();
     const target=pickBucket(a,b);
     let selected=null,tries=0;
