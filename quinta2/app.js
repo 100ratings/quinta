@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.0.5";
+  const VERSION = "2.0.6";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -29,9 +29,9 @@
       continueTraining:"Continuar treinamento",resetCounters:"Zerar contadores",
       nice:"Correto!",miss:"Incorreto!",youSelected:"Sua resposta",ideal:"Correto",
       type:"Tipo",startFrom:"Início",path:"Caminho",
-      lockedHint:"Toque em Novo número para continuar",good:"Bom",slow:"Lento",
+      lockedHint:"Toque em Novo número para continuar",waitingFeedback:"Aguardando sua resposta",good:"Bom",slow:"Lento",
       invalidNumber:"Digite um número inteiro positivo",invalidThresholds:"Informe valores positivos, com Rápido menor que Lento",
-      saved:"Configurações salvas",confirmReset:"Zerar acertos, erros e aprendizagem adaptativa do QUINTA 2?",
+      saved:"Configurações salvas",confirmReset:"Zerar acertos, erros e aprendizagem adaptativa do QUINTA?",
       milestoneTitle:(n) => n + " acertos!",milestoneMsg:"Excelente! Continue praticando até o método ficar automático",
       voiceWrong:"errou",manualUse:"usar N+1",noSpeech:"Voz indisponível neste navegador",
       helpHTML:'<h3>O princípio QUINTA</h3><p>O <b>Force</b> é sempre o <b>segundo objeto da esquerda</b>, entre cinco objetos</p><p><b>Basic:</b> conta os objetos, começando no objeto inicial<br><b>Bounce:</b> conta os movimentos entre objetos, sem contar o inicial</p><h3>Regra matemática</h3><p>Para N <b>par</b>, use <b>Basic</b><br>Para N <b>ímpar</b>, use <b>Bounce</b> e calcule N + 1</p><p>Use a <b>Esquerda</b> se o número considerado deixar resto <b>0 ou 2 na divisão por 8</b>, nos outros casos use a <b>Direita</b></p><h3>Treino rápido</h3><ul><li>Veja ou escute o número</li><li>Toque no objeto 1 ou no botão Esquerda, ou no objeto 5 ou no botão Direita</li><li>Quando acertar, um novo número aparecerá automaticamente após 350 ms</li><li>Quando errar, leia a resposta e toque em Novo número</li></ul><h3>Modo tradicional</h3><p>Ative Tradicional nas Configurações, escolha Basic ou Bounce, Esquerda ou Direita e toque em Verificar resposta, o avanço automático dos acertos leva 500 ms</p><h3>Atalhos de teclado</h3><p><b>N:</b> novo número, <b>Enter:</b> verificar no modo tradicional, <b>H:</b> ajuda, <b>Q:</b> ajuda, <b>↑/↓:</b> Basic/Bounce e <b>←/→:</b> Esquerda/Direita</p>'
@@ -57,9 +57,9 @@
       continueTraining:"Continue training",resetCounters:"Reset counters",
       nice:"Correct!",miss:"Wrong!",youSelected:"Your answer",ideal:"Correct answer",
       type:"Type",startFrom:"Start",path:"Path",
-      lockedHint:"Tap New number to continue",good:"Good",slow:"Slow",
+      lockedHint:"Tap New number to continue",waitingFeedback:"Waiting for your answer",good:"Good",slow:"Slow",
       invalidNumber:"Enter a positive whole number",invalidThresholds:"Enter positive values, with Fast less than Slow",
-      saved:"Settings saved",confirmReset:"Reset correct answers, mistakes and adaptive learning for QUINTA 2?",
+      saved:"Settings saved",confirmReset:"Reset correct answers, mistakes and adaptive learning for QUINTA?",
       milestoneTitle:(n) => n + " reps!",milestoneMsg:"Excellent! Keep practicing until the method feels automatic",
       voiceWrong:"wrong",manualUse:"use N+1",noSpeech:"Speech is unavailable in this browser",
       helpHTML:'<h3>The QUINTA principle</h3><p>The <b>Force</b> is always the <b>second item from the left</b> out of five</p><p><b>Basic:</b> count each item, including the starting item<br><b>Bounce:</b> count moves between items, excluding the starting item</p><h3>Mathematical rule</h3><p>For <b>even</b> N, use <b>Basic</b><br>For <b>odd</b> N, use <b>Bounce</b> and calculate N + 1</p><p>Start on the <b>Left</b> when that number is <b>0 or 2 modulo 8</b>, otherwise start on the <b>Right</b></p><h3>Fast training</h3><ul><li>Read or listen to the number</li><li>Tap item 1 or Left, or item 5 or Right</li><li>Correct answers automatically advance after 350 ms</li><li>Wrong answers show the solution, tap New number to continue</li></ul><h3>Traditional mode</h3><p>Select Traditional in Settings, choose Basic or Bounce and Left or Right, then tap Check answer, correct answers advance after 500 ms</p><h3>Keyboard shortcuts</h3><p><b>N:</b> new number, <b>Enter:</b> check in Traditional mode, <b>H:</b> help, <b>Q:</b> help, <b>↑/↓:</b> Basic/Bounce and <b>←/→:</b> Left/Right</p>'
@@ -188,8 +188,14 @@
     feedbackInfo=info;
     const el=$("#feedback");
     el.replaceChildren();
-    if(!info) {el.classList.remove("visible");return;}
-    el.classList.add("visible");
+    el.scrollTop=0;
+    if(!info) {
+      const placeholder=document.createElement("div");
+      placeholder.className="feedback-placeholder";
+      placeholder.textContent=t("waitingFeedback");
+      el.appendChild(placeholder);
+      return;
+    }
     const title=document.createElement("strong");
     title.className=info.correct?"ok":"err";
     title.textContent=info.correct?t("nice"):t("miss");

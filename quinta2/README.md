@@ -1,4 +1,4 @@
-# QUINTA 2
+# QUINTA
 
 Versão moderna do treinador QUINTA, isolada na pasta \`quinta2/\` do mesmo repositório
 

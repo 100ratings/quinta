@@ -326,3 +326,37 @@ input[type="checkbox"]{accent-color:#f5f5f6;width:17px;height:17px;cursor:pointe
     border-color:transparent;
   }
 }
+
+
+/* v2.0.6: keep feedback in the layout, never collapse or shift training controls */
+.feedback{
+  display:block;
+  height:142px;
+  min-height:142px;
+  max-height:142px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  overscroll-behavior:contain;
+  scrollbar-gutter:stable;
+  background:#1b1d21;
+  border:1px solid #303238;
+  border-radius:15px;
+  margin-top:15px;
+  padding:13px 15px;
+}
+.feedback-placeholder{
+  height:100%;
+  min-height:0;
+  display:grid;
+  place-items:center;
+  text-align:center;
+  color:#83868f;
+  font-size:12px;
+  letter-spacing:.015em;
+}
+.feedback .detail{
+  overflow-wrap:anywhere;
+}
+@media(max-width:390px){
+  .feedback{height:146px;min-height:146px;max-height:146px}
+}
