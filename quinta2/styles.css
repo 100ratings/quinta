@@ -482,3 +482,25 @@ input[type="checkbox"]{accent-color:#f5f5f6;width:17px;height:17px;cursor:pointe
   .topbar { padding-bottom: 7px; }
   .number-wrap { padding: 4px 0 5px; }
 }
+
+/* 2.1.0: automatic personalized learning summary in settings */
+.adaptive-summary{
+  display:block;
+  color:#aeb2ba;
+  font-size:12px;
+  line-height:1.5;
+  font-variant-numeric:tabular-nums;
+  padding:1px 0;
+}
+.adaptive-info{
+  font-size:12px;
+  line-height:1.65;
+  color:#bbc0c8;
+  padding:11px 13px;
+  background:#222429;
+  border:1px solid #35383e;
+  border-radius:12px;
+}
+#eggModal .egg-content{padding:17px 2px 8px;gap:15px}
+#eggModal .egg-content p{max-width:32ch;margin:0 auto;line-height:1.6}
+#eggModal #eggContinue,#eggModal #eggFinish{width:100%}

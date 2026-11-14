@@ -10,6 +10,19 @@ https://100ratings.github.io/quinta/quinta2/
 
 O aplicativo original continua em \`/quinta/\`
 
+## Treinamento adaptativo pessoal, v2.1.0
+
+- Aprende separadamente nos modos Fast Tap e Tradicional
+- Depois de 8 respostas corretas, estima o ritmo pessoal usando a mediana das 48 respostas corretas mais recentes
+- Respostas erradas aumentam sempre a dificuldade do número e da categoria, independentemente do tempo
+- Acertos mais lentos que o ritmo habitual aumentam a dificuldade, enquanto acertos confortáveis diminuem
+- Números difíceis são agendados para revisão após alguns outros exercícios, com uma probabilidade máxima de 38% para revisões disponíveis, preservando variedade
+- Categorias Basic/Bounce + Esquerda/Direita recebem peso conforme dificuldades observadas
+- Não depende dos antigos limiares fixos de 3 e 5 segundos
+- Quando a voz do número é utilizada, o cronômetro começa ao fim da fala, com limite de segurança para navegadores que não disparam os eventos de voz
+- A cada 100 acertos acumulados, interrompe o avanço e pergunta se deseja continuar ou encerrar por agora, sem reiniciar os acertos
+- Dados do novo aprendizado ficam no armazenamento existente do QUINTA, mantendo os contadores e demais preferências
+
 ## Funcionalidades
 
 - Interface responsiva monocromática, pensada primeiro para celular
@@ -17,7 +30,7 @@ O aplicativo original continua em \`/quinta/\`
 - Modo Tradicional com Basic e Bounce
 - Force fixo no segundo objeto da esquerda
 - Português e inglês automáticos por idioma do dispositivo, com alteração manual
-- Treinamento adaptativo por categorias, limites de tempo configuráveis
+- Treinamento adaptativo pessoal por erros, tempo relativo, categorias e números individuais
 - Voz sintetizada para números e erros, com seleção da voz do navegador
 - Consulta de regras para qualquer inteiro positivo
 - Atalhos, ajuda, estatísticas, marcos de 100 acertos
