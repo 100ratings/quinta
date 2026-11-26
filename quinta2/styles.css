@@ -534,3 +534,23 @@ input[type="checkbox"]{accent-color:#f5f5f6;width:17px;height:17px;cursor:pointe
 }
 #audioPackStatus{font-size:11px;color:#aeb1ba;overflow-wrap:anywhere}
 #clearAudioPack{justify-self:start;min-height:35px}
+
+
+/* v2.2.1: prevent Safari auto-zoom when focusing form controls */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  font-size:16px !important;
+  -webkit-text-size-adjust:100%;
+  touch-action:manipulation;
+}
+input[type="checkbox"],input[type="radio"],button {
+  touch-action:manipulation;
+}
+.setting-row select{
+  min-width:0;
+  max-width:min(56%,240px);
+}
+#audioPackFile{font-size:16px !important}
+#audioPackFile::file-selector-button{font-size:16px}
+.lang-select{font-size:16px !important}

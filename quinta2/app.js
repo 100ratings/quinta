@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.2.0";
+  const VERSION = "2.2.1";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
