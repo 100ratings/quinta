@@ -1,0 +1,114 @@
+/* QUINTA audio pack, local IndexedDB storage, no Azure API credentials */
+(function () {
+  "use strict";
+  const DB_NAME="quinta_humberto_audio_v1";
+  const STORE="clips";
+  const urls=new Map();
+  let initialized=false;
+  let initPromise=null;
+
+  function openDatabase() {
+    return new Promise((resolve,reject)=>{
+      if(!("indexedDB" in window)) {reject(new Error("IndexedDB unavailable"));return;}
+      const req=indexedDB.open(DB_NAME,1);
+      req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(STORE))req.result.createObjectStore(STORE,{keyPath:"name"});};
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error||new Error("Cannot open audio storage"));
+      req.onblocked=()=>reject(new Error("Audio storage blocked"));
+    });
+  }
+  function releaseUrls() {
+    for(const url of urls.values())URL.revokeObjectURL(url);
+    urls.clear();
+  }
+  async function init() {
+    if(initialized)return urls.size;
+    if(initPromise)return initPromise;
+    initPromise=(async()=>{
+      const db=await openDatabase();
+      try {
+        const entries=await new Promise((resolve,reject)=>{
+          const req=db.transaction(STORE,"readonly").objectStore(STORE).getAll();
+          req.onsuccess=()=>resolve(req.result||[]);
+          req.onerror=()=>reject(req.error||new Error("Cannot read audio storage"));
+        });
+        releaseUrls();
+        for(const entry of entries)if(entry&&typeof entry.name==="string"&&entry.blob instanceof Blob)urls.set(entry.name,URL.createObjectURL(entry.blob));
+        initialized=true;
+        return urls.size;
+      }finally{db.close();}
+    })();
+    try{return await initPromise;}finally{initPromise=null;}
+  }
+  function unzipMp3(arrayBuffer) {
+    const view=new DataView(arrayBuffer),bytes=new Uint8Array(arrayBuffer);
+    const length=bytes.length;
+    const u16=o=>view.getUint16(o,true);
+    const u32=o=>view.getUint32(o,true);
+    let eocd=-1;
+    for(let i=length-22;i>=Math.max(0,length-65557);i--) {
+      if(u32(i)===0x06054b50){eocd=i;break;}
+    }
+    if(eocd<0)throw new Error("Invalid ZIP file");
+    const count=u16(eocd+10),directoryOffset=u32(eocd+16);
+    if(count>150||directoryOffset>=length)throw new Error("Invalid ZIP directory");
+    let pos=directoryOffset;
+    const clips=[];
+    for(let i=0;i<count;i++) {
+      if(pos+46>length||u32(pos)!==0x02014b50)throw new Error("Corrupt ZIP directory");
+      const flags=u16(pos+8),method=u16(pos+10),compressed=u32(pos+20),uncompressed=u32(pos+24);
+      const nameLength=u16(pos+28),extraLength=u16(pos+30),commentLength=u16(pos+32);
+      const offset=u32(pos+42);
+      if(pos+46+nameLength+extraLength+commentLength>length)throw new Error("Corrupt ZIP entry");
+      const name=new TextDecoder("utf-8").decode(bytes.subarray(pos+46,pos+46+nameLength));
+      pos+=46+nameLength+extraLength+commentLength;
+      if(!/^(?:[1-9]\d?|100|errou|mensagem_100_acertos)\.mp3$/.test(name))continue;
+      if((flags&1)!==0)throw new Error("Encrypted ZIP files are not supported");
+      if(method!==0)throw new Error("This ZIP uses compression; export with ZIP Stored");
+      if(compressed!==uncompressed||uncompressed>1024*1024)throw new Error("Invalid MP3 size");
+      if(offset+30>length||u32(offset)!==0x04034b50)throw new Error("Invalid ZIP MP3 entry");
+      const dataOffset=offset+30+u16(offset+26)+u16(offset+28);
+      if(dataOffset+compressed>length)throw new Error("Incomplete MP3 in ZIP");
+      const start=bytes[dataOffset],second=bytes[dataOffset+1];
+      if(!(start===0x49&&second===0x44||start===0xff&&(second&0xe0)===0xe0))throw new Error("Invalid MP3 header: "+name);
+      clips.push({name,blob:new Blob([bytes.slice(dataOffset,dataOffset+compressed)],{type:"audio/mpeg"})});
+    }
+    if(clips.length===0)throw new Error("No compatible MP3 files found");
+    const names=new Set(clips.map(c=>c.name));
+    for(let n=1;n<=100;n++)if(!names.has(n+".mp3"))throw new Error("Missing number "+n+".mp3");
+    return clips;
+  }
+  async function importZip(file) {
+    if(!file||file.size>50*1024*1024)throw new Error("Select a ZIP up to 50 MB");
+    const buffer=await file.arrayBuffer();
+    const clips=unzipMp3(buffer);
+    const db=await openDatabase();
+    try {
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction(STORE,"readwrite"),store=tx.objectStore(STORE);
+        store.clear();
+        clips.forEach(c=>store.put(c));
+        tx.oncomplete=resolve;
+        tx.onerror=()=>reject(tx.error||new Error("Cannot store audio pack"));
+        tx.onabort=()=>reject(tx.error||new Error("Audio import aborted"));
+      });
+    }finally{db.close();}
+    releaseUrls();
+    for(const c of clips)urls.set(c.name,URL.createObjectURL(c.blob));
+    initialized=true;
+    return clips.length;
+  }
+  async function clear() {
+    const db=await openDatabase();
+    try {
+      await new Promise((resolve,reject)=>{
+        const tx=db.transaction(STORE,"readwrite");
+        tx.objectStore(STORE).clear();
+        tx.oncomplete=resolve;
+        tx.onerror=()=>reject(tx.error||new Error("Cannot clear audio storage"));
+      });
+    }finally{db.close();}
+    releaseUrls();initialized=true;
+  }
+  window.QuintaAudioPack={init,importZip,clear,get:(name)=>urls.get(name)||null,count:()=>urls.size};
+})();
