@@ -23,6 +23,25 @@ O aplicativo original continua em \`/quinta/\`
 - A cada 100 acertos acumulados, interrompe o avanço e pergunta se deseja continuar ou encerrar por agora, sem reiniciar os acertos
 - Dados do novo aprendizado ficam no armazenamento existente do QUINTA, mantendo os contadores e demais preferências
 
+## Voz Humberto do Azure, v2.2.0
+
+A voz gravada é carregada localmente no navegador sem usar chave de API ou fazer solicitações ao Azure durante o treinamento
+
+1. Gere e salve o ZIP com os números de 1 a 100, `errou.mp3` e `mensagem_100_acertos.mp3`
+2. No QUINTA, abra **Configurações > Voz > Pacote de áudios Humberto**
+3. Selecione o arquivo ZIP, a importação é feita uma única vez por dispositivo
+4. O app armazena os arquivos MP3 no IndexedDB e passa a usar a opção **Azure Humberto (MP3)**
+
+- Usa MP3s para números de 1 a 100, erros e a mensagem dos 100 acertos
+- Números personalizados acima de 100 continuam funcionando com a voz nativa do dispositivo
+- Permite alternar entre Azure Humberto, voz nativa e treinamento silencioso
+- O cronômetro do número começa após a reprodução, com alternativa de segurança quando não há áudio
+- Arquivos são locais a cada aparelho/navegador e podem ser removidos em Configurações
+- A chave do Azure nunca é necessária no QUINTA
+- O ZIP precisa conter os MP3s na raiz, no formato ZIP sem compressão (Stored)
+- Safari/iOS pode bloquear o áudio inicial antes de um gesto, toque em **Novo número** para habilitar a reprodução
+- O repositório contém o importador, não os MP3s privados, cada dispositivo precisa receber o ZIP uma vez
+
 ## Funcionalidades
 
 - Interface responsiva monocromática, pensada primeiro para celular

@@ -9,19 +9,20 @@
   <meta name="apple-mobile-web-app-title" content="QUINTA">
   <meta name="description" content="QUINTA, training for the five-item force">
   <title>QUINTA</title>
-  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?v=2.1.0">
-  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?v=2.1.0">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=2.1.0">
-  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2.1.0">
-  <link rel="manifest" href="./site.webmanifest?v=2.1.0">
-  <link rel="stylesheet" href="./styles.css?v=2.1.0">
-  <script src="./app.js?v=2.1.0" defer></script>
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png?v=2.2.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png?v=2.2.0">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png?v=2.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png?v=2.2.0">
+  <link rel="manifest" href="./site.webmanifest?v=2.2.0">
+  <link rel="stylesheet" href="./styles.css?v=2.2.0">
+  <script src="./audioPack.js?v=2.2.0" defer></script>
+  <script src="./app.js?v=2.2.0" defer></script>
 </head>
 <body>
   <main class="app">
     <header class="topbar">
       <div class="brand">
-        <img class="brand-mark" src="./icon-192.png?v=2.1.0" alt="" width="39" height="39">
+        <img class="brand-mark" src="./icon-192.png?v=2.2.0" alt="" width="39" height="39">
         <div class="brand-copy"><strong>QUINTA</strong><small data-i18n="subtitle">TREINAMENTO</small></div>
       </div>
       <div class="top-actions">
@@ -113,9 +114,23 @@
 
       <div class="settings-group">
         <h3 data-i18n="voice">Voz</h3>
+        <div class="setting-row">
+          <label for="speechSourceSel" data-i18n="audioSource">Fonte da voz</label>
+          <select id="speechSourceSel">
+            <option value="azure" data-i18n="audioSourceAzure">Azure Humberto (MP3)</option>
+            <option value="native" data-i18n="audioSourceNative">Voz do dispositivo</option>
+            <option value="off" data-i18n="audioSourceOff">Sem áudio</option>
+          </select>
+        </div>
         <label class="checkline"><input id="ttsCB" type="checkbox" checked><span data-i18n="speakNumber">Falar o número</span></label>
         <div class="setting-row"><label for="voiceSel" data-i18n="chooseVoice">Selecionar voz</label><select id="voiceSel" style="max-width:210px"><option value="" data-i18n="voiceAuto">Automático</option></select></div>
         <label class="checkline"><input id="errTtsCB" type="checkbox" checked><span data-i18n="speakErrors">Falar os erros</span></label>
+        <div class="audio-import">
+          <label for="audioPackFile" data-i18n="audioPack">Pacote de áudios Humberto</label>
+          <input id="audioPackFile" type="file" accept=".zip,application/zip" aria-label="Importar ZIP de áudios">
+          <div id="audioPackStatus" class="manual-output" role="status" aria-live="polite"></div>
+          <button id="clearAudioPack" class="secondary-btn" type="button" data-i18n="audioClear" disabled>Apagar pacote</button>
+        </div>
       </div>
 
       <div class="settings-group">

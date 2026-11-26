@@ -504,3 +504,33 @@ input[type="checkbox"]{accent-color:#f5f5f6;width:17px;height:17px;cursor:pointe
 #eggModal .egg-content{padding:17px 2px 8px;gap:15px}
 #eggModal .egg-content p{max-width:32ch;margin:0 auto;line-height:1.6}
 #eggModal #eggContinue,#eggModal #eggFinish{width:100%}
+
+
+/* v2.2.0: one-time Azure Humberto ZIP import, visually contained in settings */
+.audio-import{
+  display:grid;
+  gap:8px;
+  padding:12px 13px;
+  background:#202227;
+  border:1px solid #35383d;
+  border-radius:13px;
+}
+.audio-import>label{font-size:12px;font-weight:650;color:#e5e6e8}
+#audioPackFile{
+  max-width:100%;
+  width:100%;
+  font-size:12px;
+  color:#c5c7cd;
+}
+#audioPackFile::file-selector-button{
+  border:1px solid #5b5e65;
+  border-radius:9px;
+  background:#35373d;
+  color:#fafafa;
+  font:inherit;
+  font-weight:650;
+  padding:9px 11px;
+  margin-right:10px;
+}
+#audioPackStatus{font-size:11px;color:#aeb1ba;overflow-wrap:anywhere}
+#clearAudioPack{justify-self:start;min-height:35px}

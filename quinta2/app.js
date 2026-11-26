@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.1.0";
+  const VERSION = "2.2.0";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -21,7 +21,7 @@
       adaptiveDescription:"O QUINTA aprende seu ritmo com respostas corretas, repete números difíceis e dá mais atenção aos tipos com erros ou lentidão, sem deixar de variar",
       calibrating:(n)=>"Aprendendo seu ritmo · "+n+"/8",personalPace:(t)=>"Ritmo habitual: "+t,
       adaptiveDisabled:"Treinamento adaptativo desativado",
-      showPath:"Mostrar caminho da contagem nos erros",voice:"Voz",
+      showPath:"Mostrar caminho da contagem nos erros",voice:"Voz",audioSource:"Fonte da voz",audioSourceAzure:"Azure Humberto (MP3)",audioSourceNative:"Voz do dispositivo",audioSourceOff:"Sem áudio",audioPack:"Pacote de áudios Humberto",audioImport:"Importar ZIP",audioMissing:"Nenhum pacote importado, usando voz nativa quando possível",audioReady:(n)=>n+" áudios prontos no aparelho",audioImporting:"Importando áudios…",audioImported:(n)=>n+" áudios importados e salvos neste aparelho",audioImportFailed:"Falha ao importar",audioClear:"Apagar pacote",audioClearConfirm:"Apagar os áudios importados deste aparelho?",audioStorageFailed:"Não foi possível acessar o armazenamento de áudio",
       speakNumber:"Falar o número",chooseVoice:"Selecionar voz",voiceAuto:"Automático",
       speakErrors:"Falar os erros",tools:"Ferramentas",analyzeLabel:"Analisar número",
       analyze:"Analisar",rules:"Regras e guia rápido",reset:"Zerar treinamento",
@@ -53,7 +53,7 @@
       adaptiveDescription:"QUINTA learns your personal pace from correct answers, revisits difficult numbers and practices error-prone or slower types more often while keeping variety",
       calibrating:(n)=>"Learning your pace · "+n+"/8",personalPace:(t)=>"Usual pace: "+t,
       adaptiveDisabled:"Adaptive training off",showPath:"Show counting path after a wrong answer",
-      voice:"Voice",speakNumber:"Speak number",chooseVoice:"Choose voice",
+      voice:"Voice",audioSource:"Voice source",audioSourceAzure:"Azure Humberto (MP3)",audioSourceNative:"Device voice",audioSourceOff:"No audio",audioPack:"Humberto audio pack",audioImport:"Import ZIP",audioMissing:"No pack imported, using the device voice when possible",audioReady:(n)=>n+" audio files ready on this device",audioImporting:"Importing audio…",audioImported:(n)=>n+" audio files imported and stored on this device",audioImportFailed:"Import failed",audioClear:"Delete pack",audioClearConfirm:"Delete imported audio from this device?",audioStorageFailed:"Cannot access audio storage",speakNumber:"Speak number",chooseVoice:"Choose voice",
       voiceAuto:"Automatic",speakErrors:"Speak errors",tools:"Tools",
       analyzeLabel:"Analyze number",analyze:"Analyze",rules:"Rules & quick guide",
       reset:"Reset training",updates:"Updates",upToDate:"Up to date",
@@ -73,7 +73,7 @@
   };
 
   const defaults = {language:"auto",mode:"fast",range:"1-40",minN:"1",maxN:"15",
-    adaptive:true,tts:true,errTts:true,voice:"",type:"basic",side:"left",
+    adaptive:true,tts:true,errTts:true,voice:"",speechSource:"azure",type:"basic",side:"left",
     step:false,fastThreshold:3.0,slowThreshold:5.0,ok:0,err:0,
     weights:[1,1,1,1],lastEggMilestone:0,adaptiveData:null};
   let stored = {};
@@ -84,6 +84,7 @@
     if (Object.prototype.hasOwnProperty.call(stored,key)) settings[key] = stored[key];
   }
   if (!["auto","pt","en"].includes(settings.language)) settings.language = "auto";
+  if (!["azure","native","off"].includes(settings.speechSource)) settings.speechSource = "azure";
   if (!["fast","traditional"].includes(settings.mode)) settings.mode = "fast";
   if (!["basic","bounce"].includes(settings.type)) settings.type = "basic";
   if (!["left","right"].includes(settings.side)) settings.side = "left";
@@ -148,6 +149,7 @@
   let pendingNext = null, feedbackInfo = null, remoteVersion = null, voices = [];
   let activeFlashTimeout = null;
   let speechToken=0, speechSafetyTimer=null, awaitingSpeech=false;
+  let audioPlayer=null, audioMessage=null;
   let focusedBeforeModal = null;
 
   function language() {
@@ -372,8 +374,14 @@
     if(speechSafetyTimer!==null) {clearTimeout(speechSafetyTimer);speechSafetyTimer=null;}
     if(N!==null&&!locked)startTime=performance.now();
   }
-  function speak(text,force,onDone) {
-    if(!force&&!settings.tts)return false;
+  function stopAudio() {
+    if(!audioPlayer)return;
+    const player=audioPlayer;
+    audioPlayer=null;
+    player.onended=null;player.onerror=null;
+    try {player.pause();player.currentTime=0;} catch (_) {}
+  }
+  function speakNative(text,onDone) {
     if(!("speechSynthesis" in window)||!("SpeechSynthesisUtterance" in window))return false;
     try {
       const u=new SpeechSynthesisUtterance(String(text));
@@ -383,7 +391,37 @@
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(u);
       return true;
-    } catch (_) {return false;}
+    }catch(_){return false;}
+  }
+  function speak(text,force,onDone,filename) {
+    if(settings.speechSource==="off"||(!force&&!settings.tts))return false;
+    stopAudio();
+    if(settings.speechSource==="azure"&&filename&&window.QuintaAudioPack) {
+      const url=window.QuintaAudioPack.get(filename);
+      if(url) {
+        let player=null,handled=false;
+        const fallback=()=>{
+          if(handled||audioPlayer!==player)return;
+          handled=true;stopAudio();
+          if(!speakNative(text,onDone)&&onDone)onDone();
+        };
+        try {
+          player=new Audio(url);
+          audioPlayer=player;
+          player.preload="auto";
+          player.onended=()=>{
+            if(audioPlayer!==player)return;
+            audioPlayer=null;
+            if(onDone)onDone();
+          };
+          player.onerror=fallback;
+          const promise=player.play();
+          if(promise&&typeof promise.catch==="function")promise.catch(fallback);
+          return true;
+        }catch(_){fallback();}
+      }
+    }
+    return speakNative(text,onDone);
   }
   function responseSeconds() {
     // The spoken prompt should not count as thinking time
@@ -393,7 +431,15 @@
     if(!settings.errTts) return;
     const lang=getVoiceLang().toLowerCase();
     const words={pt:"errou",en:"wrong",es:"incorrecto",fr:"faux",de:"falsch",it:"sbagliato"};
-    speak(words[lang.slice(0,2)]||t("voiceWrong"),true);
+    speak(words[lang.slice(0,2)]||t("voiceWrong"),true,null,lang.startsWith("pt")?"errou.mp3":null);
+  }
+
+  function updateAudioUI(statusText) {
+    const count=window.QuintaAudioPack?window.QuintaAudioPack.count():0;
+    $("#audioPackStatus").textContent=statusText || (count?t("audioReady")(count):t("audioMissing"));
+    $("#speechSourceSel").value=settings.speechSource;
+    $("#voiceSel").disabled=settings.speechSource!=="native";
+    $("#clearAudioPack").disabled=count===0;
   }
   function refreshVoices() {
     if(!("speechSynthesis" in window)) return;
@@ -416,23 +462,25 @@
       sel.appendChild(item);
     }
     if(Array.from(sel.options).some(o=>o.value===current)) sel.value=current;
+    sel.disabled=settings.speechSource!=="native";
   }
 
   function newNumber() {
     if(pendingNext!==null) {clearTimeout(pendingNext);pendingNext=null;}
     if(activeFlashTimeout!==null) {clearTimeout(activeFlashTimeout);activeFlashTimeout=null;}
     if(speechSafetyTimer!==null) {clearTimeout(speechSafetyTimer);speechSafetyTimer=null;}
+    stopAudio();
     const token=++speechToken;
     const [a,b]=currentRange();
     N=chooseNumber(a,b);
     lastN=N;locked=false;startTime=performance.now();elapsedStop=null;
     $("#number").textContent=String(N);
     setFeedback(null);clearActive();
-    awaitingSpeech=!!settings.tts&&("speechSynthesis" in window)&&("SpeechSynthesisUtterance" in window);
+    awaitingSpeech=!!settings.tts&&settings.speechSource!=="off";
     if(awaitingSpeech) {
       speechSafetyTimer=setTimeout(()=>finishSpeechTiming(token),4000);
     }
-    if(!speak(N,false,()=>finishSpeechTiming(token)))finishSpeechTiming(token);
+    if(!speak(N,false,()=>finishSpeechTiming(token),N+".mp3"))finishSpeechTiming(token);
   }
   function checkMilestone() {
     if(settings.ok<=0 || settings.ok%100!==0 || settings.lastEggMilestone===settings.ok) return false;
@@ -441,7 +489,7 @@
     $("#eggTitle").textContent=t("milestoneTitle")(settings.ok);
     $("#eggMsg").textContent=t("milestoneMsg");
     openModal("eggModal");
-    speak($("#eggTitle").textContent+" "+$("#eggMsg").textContent,true);
+    speak($("#eggTitle").textContent+" "+$("#eggMsg").textContent,true,null,language()==="pt"?"mensagem_100_acertos.mp3":null);
     return true;
   }
   function record(correct,info,delay) {
@@ -504,6 +552,7 @@
     $("#manualN").placeholder=language()==="pt"?"Ex: 33":"e.g. 33";
     $("#languageSel").value=settings.language;
     refreshVoices();syncMode();updateTimeLegend();
+    updateAudioUI();
     setFeedback(feedbackInfo);updateVersionUI();
     if($("#eggModal").hidden===false) {
       $("#eggTitle").textContent=t("milestoneTitle")(settings.ok);
@@ -517,6 +566,8 @@
     $("#adaptiveCB").checked=!!settings.adaptive;
     $("#adaptCfgBtn").disabled=!settings.adaptive;
     $("#ttsCB").checked=!!settings.tts;$("#errTtsCB").checked=!!settings.errTts;
+    $("#speechSourceSel").value=settings.speechSource;
+    updateAudioUI();
     $("#step").checked=!!settings.step;
     $("#adaptSettings").hidden=true;
     updateTimeLegend();
@@ -587,6 +638,24 @@
       $("#"+id).addEventListener("change",e=>{settings[key]=e.target.checked;persist();if(key==="adaptive"){$("#adaptCfgBtn").disabled=!settings.adaptive;updateTimeLegend();}});
     }
     $("#voiceSel").addEventListener("change",e=>{settings.voice=e.target.value;persist();});
+    $("#speechSourceSel").addEventListener("change",e=>{
+      settings.speechSource=e.target.value;persist();updateAudioUI();
+      if(settings.speechSource==="off") {stopAudio();if("speechSynthesis" in window)window.speechSynthesis.cancel();}
+    });
+    $("#audioPackFile").addEventListener("change",async e=>{
+      const file=e.target.files&&e.target.files[0];if(!file)return;
+      updateAudioUI(t("audioImporting"));
+      try {
+        const count=await window.QuintaAudioPack.importZip(file);
+        settings.speechSource="azure";persist();updateAudioUI(t("audioImported")(count));
+      }catch(error){updateAudioUI(t("audioImportFailed")+": "+error.message);}
+      e.target.value="";
+    });
+    $("#clearAudioPack").addEventListener("click",async()=>{
+      if(!window.confirm(t("audioClearConfirm")))return;
+      try {await window.QuintaAudioPack.clear();updateAudioUI();}
+      catch(error){updateAudioUI(t("audioImportFailed")+": "+error.message);}
+    });
     for(const [id,key] of [["tBasic","type"],["tBounce","type"],["sLeft","side"],["sRight","side"]]) {
       $("#"+id).addEventListener("change",e=>{if(e.target.checked){settings[key]=e.target.value;persist();}});
     }
@@ -633,6 +702,9 @@
     applyLanguage();
     refreshVoices();
     if("speechSynthesis" in window) window.speechSynthesis.onvoiceschanged=refreshVoices;
+    if(window.QuintaAudioPack) {
+      window.QuintaAudioPack.init().then(()=>updateAudioUI()).catch(()=>updateAudioUI(t("audioStorageFailed")));
+    }
     newNumber();
     updateTimer();
     checkUpdates();
