@@ -23,6 +23,19 @@ O aplicativo original continua em \`/quinta/\`
 - A cada 100 acertos acumulados, interrompe o avanço e pergunta se deseja continuar ou encerrar por agora, sem reiniciar os acertos
 - Dados do novo aprendizado ficam no armazenamento existente do QUINTA, mantendo os contadores e demais preferências
 
+## Reprodução rápida, v2.2.2
+
+Ao abrir o QUINTA, as 102 gravações previamente importadas são decodificadas em memória, em segundo plano, usando Web Audio
+
+Quando o número aparece, a reprodução das gravações já preparadas começa no mesmo fluxo de atualização visual, sem criar um novo tocador de MP3 a cada resposta
+
+- Não é necessário importar novamente o pacote de MP3s já salvo no IndexedDB
+- O primeiro número pode usar o reprodutor anterior enquanto as gravações são preparadas
+- Quando Web Audio não está disponível, usa a reprodução MP3 anterior e, em caso de falha, a voz nativa
+- No iOS, é necessário ao menos um gesto para habilitar a reprodução, devido às restrições do Safari
+- Não altera o momento em que o cronômetro inicia, que continua após a fala
+- Não altera o intervalo de 350 ms do Fast Tap nem as estatísticas
+
 ## Voz Humberto do Azure, v2.2.0
 
 A voz gravada é carregada localmente no navegador sem usar chave de API ou fazer solicitações ao Azure durante o treinamento

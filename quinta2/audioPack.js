@@ -6,6 +6,105 @@
   const urls=new Map();
   let initialized=false;
   let initPromise=null;
+  const clipBlobs=new Map();
+  const decoded=new Map();
+  let audioContext=null,activeSource=null,decodeGeneration=0;
+  let preparedPromise=null;
+  const DECODE_WORKERS=3;
+  const preloadOrder=[
+    "errou.mp3","mensagem_100_acertos.mp3",
+    ...Array.from({length:40},(_,i)=>(i+1)+".mp3"),
+    ...Array.from({length:60},(_,i)=>(i+41)+".mp3")
+  ];
+
+  function getAudioContext() {
+    if(!clipBlobs.size)return null;
+    const Ctx=window.AudioContext||window.webkitAudioContext;
+    if(!Ctx)return null;
+    if(audioContext&&audioContext.state!=="closed")return audioContext;
+    try {
+      audioContext=new Ctx({latencyHint:"interactive"});
+      return audioContext;
+    }catch(_) {audioContext=null;return null;}
+  }
+  function unlock() {
+    const ctx=getAudioContext();
+    if(!ctx)return false;
+    if(ctx.state!=="running"&&typeof ctx.resume==="function"){
+      try {
+        const promise=ctx.resume();
+        if(promise&&typeof promise.catch==="function")promise.catch(()=>{});
+      }catch(_) {}
+    }
+    return true;
+  }
+  function stop() {
+    if(!activeSource)return;
+    const source=activeSource;
+    activeSource=null;
+    source.onended=null;
+    try{source.stop(0);}catch(_){}
+    try{source.disconnect();}catch(_){}
+  }
+  function play(name,onDone) {
+    const ctx=getAudioContext(),buffer=decoded.get(name);
+    if(!ctx||!buffer)return false;
+    stop();
+    try {
+      const source=ctx.createBufferSource();
+      source.buffer=buffer;
+      source.connect(ctx.destination);
+      activeSource=source;
+      source.onended=()=>{
+        if(activeSource!==source)return;
+        activeSource=null;
+        try{source.disconnect();}catch(_){}
+        if(onDone)onDone();
+      };
+      if(ctx.state!=="running")unlock();
+      // Decoded samples start without creating or decoding a new MP3 player
+      source.start(0);
+      return true;
+    }catch(_) {
+      stop();
+      return false;
+    }
+  }
+  function preloadDecoded() {
+    const ctx=getAudioContext();
+    if(!ctx)return Promise.resolve(0);
+    const generation=++decodeGeneration;
+    const entries=preloadOrder.filter(name=>clipBlobs.has(name));
+    const remaining=entries.filter(name=>!decoded.has(name));
+    async function worker() {
+      while(remaining.length&&generation===decodeGeneration) {
+        const name=remaining.shift();
+        if(!name)break;
+        try {
+          const data=await clipBlobs.get(name).arrayBuffer();
+          const buffer=await ctx.decodeAudioData(data);
+          if(generation===decodeGeneration)decoded.set(name,buffer);
+        }catch(_) {}
+      }
+    }
+    preparedPromise=Promise.all(Array.from({length:DECODE_WORKERS},()=>worker())).then(()=>decoded.size);
+    preparedPromise.catch(()=>{});
+    return preparedPromise;
+  }
+  function useClips(entries) {
+    decodeGeneration++;
+    stop();
+    releaseUrls();
+    clipBlobs.clear();
+    decoded.clear();
+    for(const item of entries){
+      if(!item||typeof item.name!=="string"||!(item.blob instanceof Blob))continue;
+      clipBlobs.set(item.name,item.blob);
+      urls.set(item.name,URL.createObjectURL(item.blob));
+    }
+    // Predecode once after loading stored MP3s, no Azure API or remote requests
+    preloadDecoded();
+  }
 
   function openDatabase() {
     return new Promise((resolve,reject)=>{
@@ -32,8 +131,7 @@
           req.onsuccess=()=>resolve(req.result||[]);
           req.onerror=()=>reject(req.error||new Error("Cannot read audio storage"));
         });
-        releaseUrls();
-        for(const entry of entries)if(entry&&typeof entry.name==="string"&&entry.blob instanceof Blob)urls.set(entry.name,URL.createObjectURL(entry.blob));
+        useClips(entries);
         initialized=true;
         return urls.size;
       }finally{db.close();}
@@ -93,8 +191,7 @@
         tx.onabort=()=>reject(tx.error||new Error("Audio import aborted"));
       });
     }finally{db.close();}
-    releaseUrls();
-    for(const c of clips)urls.set(c.name,URL.createObjectURL(c.blob));
+    useClips(clips);
     initialized=true;
     return clips.length;
   }
@@ -108,7 +205,13 @@
         tx.onerror=()=>reject(tx.error||new Error("Cannot clear audio storage"));
       });
     }finally{db.close();}
-    releaseUrls();initialized=true;
+    decodeGeneration++;stop();releaseUrls();clipBlobs.clear();decoded.clear();initialized=true;
   }
-  window.QuintaAudioPack={init,importZip,clear,get:(name)=>urls.get(name)||null,count:()=>urls.size};
+  window.QuintaAudioPack={
+    init,importZip,clear,
+    get:(name)=>urls.get(name)||null,
+    count:()=>urls.size,
+    readyCount:()=>decoded.size,
+    unlock,play,stop
+  };
 })();

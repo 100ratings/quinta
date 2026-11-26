@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.2.1";
+  const VERSION = "2.2.2";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -375,6 +375,7 @@
     if(N!==null&&!locked)startTime=performance.now();
   }
   function stopAudio() {
+    if(window.QuintaAudioPack&&typeof window.QuintaAudioPack.stop==="function")window.QuintaAudioPack.stop();
     if(!audioPlayer)return;
     const player=audioPlayer;
     audioPlayer=null;
@@ -397,6 +398,9 @@
     if(settings.speechSource==="off"||(!force&&!settings.tts))return false;
     stopAudio();
     if(settings.speechSource==="azure"&&filename&&window.QuintaAudioPack) {
+      // Play decoded audio immediately when ready, instead of opening a new MP3
+      if(typeof window.QuintaAudioPack.play==="function"&&window.QuintaAudioPack.play(filename,onDone))return true;
+      // Fallback while the pack is predecoding or Web Audio is unavailable
       const url=window.QuintaAudioPack.get(filename);
       if(url) {
         let player=null,handled=false;
@@ -621,6 +625,15 @@
   }
 
   function setupEvents() {
+    // iOS restricts playback until a user gesture; unlock during the gesture
+    const unlockAudio=()=>{
+      if(settings.speechSource==="azure"&&window.QuintaAudioPack&&typeof window.QuintaAudioPack.unlock==="function"){
+        window.QuintaAudioPack.unlock();
+      }
+    };
+    document.addEventListener("pointerdown",unlockAudio,{passive:true,capture:true});
+    document.addEventListener("touchstart",unlockAudio,{passive:true,capture:true});
+    document.addEventListener("keydown",unlockAudio,{capture:true});
     $("#nextBtn").addEventListener("click",newNumber);
     $("#leftBtn").addEventListener("click",()=>fastTap("left"));
     $("#rightBtn").addEventListener("click",()=>fastTap("right"));
