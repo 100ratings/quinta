@@ -23,6 +23,18 @@ O aplicativo original continua em \`/quinta/\`
 - A cada 100 acertos acumulados, interrompe o avanço e pergunta se deseja continuar ou encerrar por agora, sem reiniciar os acertos
 - Dados do novo aprendizado ficam no armazenamento existente do QUINTA, mantendo os contadores e demais preferências
 
+## Silêncios do Azure e início de voz, v2.2.3
+
+O ZIP original gerado pelo Azure contém até ~150 ms de silêncio no início e tipicamente de 0,85 a 1,45 segundo no fim de cada gravação
+
+O QUINTA agora analisa o áudio decodificado, descarta automaticamente os silêncios externos com margem de segurança, e encerra a reprodução após a palavra, permitindo que o cronômetro comece no fim efetivo da fala
+
+A preparação do canal de saída acontece quando o usuário toca ou pressiona uma tecla, para reduzir a inicialização tardia do áudio no iPhone
+
+Os áudios já importados continuam válidos, não sendo necessário substituir o pacote para usar esse comportamento com Web Audio
+
+Para casos em que o iOS recorra ao reprodutor MP3 tradicional, também existe um ZIP separado de MP3s otimizados, sem os longos silêncios, que pode ser importado na mesma área de configurações
+
 ## Reprodução rápida, v2.2.2
 
 Ao abrir o QUINTA, as 102 gravações previamente importadas são decodificadas em memória, em segundo plano, usando Web Audio

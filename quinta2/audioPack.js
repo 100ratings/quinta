@@ -9,6 +9,8 @@
   const clipBlobs=new Map();
   const decoded=new Map();
   let audioContext=null,activeSource=null,decodeGeneration=0;
+  let audioPrimed=false;
+  const trims=new Map();
   let preparedPromise=null;
   const DECODE_WORKERS=3;
   const preloadOrder=[
@@ -27,6 +29,50 @@
       return audioContext;
     }catch(_) {audioContext=null;return null;}
   }
+  function calculateSpeechBounds(buffer) {
+    // Azure clips can include ~150 ms of leading silence and >800 ms of trailing silence.
+    // Detect speech with 10 ms RMS frames, leaving 30 ms before and 80 ms after the voice.
+    const frames=Math.ceil(buffer.length / Math.max(1,Math.round(buffer.sampleRate*.01)));
+    const windowSize=Math.max(1,Math.round(buffer.sampleRate*.01));
+    const levels=new Float32Array(frames);
+    const channels=Math.min(buffer.numberOfChannels,2);
+    for(let ch=0;ch<channels;ch++) {
+      const data=buffer.getChannelData(ch);
+      for(let i=0;i<frames;i++) {
+        const first=i*windowSize,last=Math.min(first+windowSize,data.length);
+        let sum=0;
+        for(let j=first;j<last;j++)sum+=data[j]*data[j];
+        if(last>first)levels[i]+=sum/(last-first)/channels;
+      }
+    }
+    let peak=0;
+    for(let i=0;i<frames;i++){
+      levels[i]=Math.sqrt(levels[i]);
+      if(levels[i]>peak)peak=levels[i];
+    }
+    if(peak<.003)return {offset:0,duration:buffer.duration};
+    const threshold=Math.max(.0015,peak*.02);
+    let first=-1,last=-1;
+    for(let i=0;i<frames;i++){
+      if(levels[i]>=threshold){if(first<0)first=i;last=i;}
+    }
+    if(first<0)return {offset:0,duration:buffer.duration};
+    const offset=Math.max(0,first*windowSize/buffer.sampleRate-.03);
+    const end=Math.min(buffer.duration,(last+1)*windowSize/buffer.sampleRate+.08);
+    if(end-offset<.07)return {offset:0,duration:buffer.duration};
+    return {offset,duration:end-offset};
+  }
+  function primeOutput(ctx) {
+    if(audioPrimed||typeof ctx.createBuffer!=="function")return;
+    try {
+      const silent=ctx.createBuffer(1,1,ctx.sampleRate);
+      const source=ctx.createBufferSource();
+      source.buffer=silent;
+      source.connect(ctx.destination);
+      source.start(0);
+      audioPrimed=true;
+    }catch(_) {}
+  }
   function unlock() {
     const ctx=getAudioContext();
     if(!ctx)return false;
@@ -36,6 +82,8 @@
         if(promise&&typeof promise.catch==="function")promise.catch(()=>{});
       }catch(_) {}
     }
+    // Initialize the output route during a real user gesture, not when a number changes
+    primeOutput(ctx);
     return true;
   }
   function stop() {
@@ -63,7 +111,9 @@
       };
       if(ctx.state!=="running")unlock();
       // Decoded samples start without creating or decoding a new MP3 player
-      source.start(0);
+      const segment=trims.get(name)||{offset:0,duration:buffer.duration};
+      // Jump past the leading silence and stop after the spoken word ends
+      source.start(0,segment.offset,segment.duration);
       return true;
     }catch(_) {
       stop();
@@ -83,7 +133,10 @@
         try {
           const data=await clipBlobs.get(name).arrayBuffer();
           const buffer=await ctx.decodeAudioData(data);
-          if(generation===decodeGeneration)decoded.set(name,buffer);
+          if(generation===decodeGeneration){
+            trims.set(name,calculateSpeechBounds(buffer));
+            decoded.set(name,buffer);
+          }
         }catch(_) {}
       }
     }
@@ -96,7 +149,7 @@
     stop();
     releaseUrls();
     clipBlobs.clear();
-    decoded.clear();
+    decoded.clear();trims.clear();
     for(const item of entries){
       if(!item||typeof item.name!=="string"||!(item.blob instanceof Blob))continue;
       clipBlobs.set(item.name,item.blob);
@@ -205,7 +258,7 @@
         tx.onerror=()=>reject(tx.error||new Error("Cannot clear audio storage"));
       });
     }finally{db.close();}
-    decodeGeneration++;stop();releaseUrls();clipBlobs.clear();decoded.clear();initialized=true;
+    decodeGeneration++;stop();releaseUrls();clipBlobs.clear();decoded.clear();trims.clear();initialized=true;
   }
   window.QuintaAudioPack={
     init,importZip,clear,
