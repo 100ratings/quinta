@@ -1,7 +1,7 @@
 (function () {
   "use strict";
 
-  const VERSION = "2.2.3";
+  const VERSION = "2.2.4";
   const STORAGE_KEY = "quinta2_settings_v1";
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -148,6 +148,7 @@
   let N = null, lastN = null, locked = false, startTime = 0, elapsedStop = null;
   let pendingNext = null, feedbackInfo = null, remoteVersion = null, voices = [];
   let activeFlashTimeout = null;
+  let updateReloading = false;
   let speechToken=0, speechSafetyTimer=null, awaitingSpeech=false;
   let audioPlayer=null, audioMessage=null;
   let focusedBeforeModal = null;
@@ -605,7 +606,7 @@
     $("#updateBtn").disabled=!available;
     $("#updateState").textContent=status ? t(status) : t(available?"updateAvailable":"upToDate");
   }
-  async function checkUpdates() {
+  async function checkUpdates(autoApply=false) {
     updateVersionUI("checking");
     try {
       const r=await fetch("./version.json?check="+Date.now(),{cache:"no-store"});
@@ -614,10 +615,16 @@
       if(!data || typeof data.version!=="string" || !/^\d+\.\d+\.\d+$/.test(data.version)) throw Error("Invalid version");
       remoteVersion=data.version;
       updateVersionUI();
+      if(autoApply && compareVersions(remoteVersion,VERSION)>0) {
+        // Avoid repeating a redirect while GitHub Pages propagates new HTML
+        const requestedVersion=new URL(location.href).searchParams.get("v");
+        if(requestedVersion!==remoteVersion)updateApp();
+      }
     } catch(_) { updateVersionUI("checkFailed"); }
   }
   function updateApp() {
-    if(!remoteVersion || compareVersions(remoteVersion,VERSION)<=0) return;
+    if(updateReloading || !remoteVersion || compareVersions(remoteVersion,VERSION)<=0) return;
+    updateReloading=true;
     const url=new URL("./",location.href);
     url.searchParams.set("v",remoteVersion);
     url.searchParams.set("t",String(Date.now()));
@@ -682,7 +689,7 @@
     });
     $("#eggContinue").addEventListener("click",()=>{closeModal("eggModal");newNumber();});
     $("#eggFinish").addEventListener("click",()=>{closeModal("eggModal");});
-    $("#checkUpdatesBtn").addEventListener("click",checkUpdates);
+    $("#checkUpdatesBtn").addEventListener("click",()=>checkUpdates(false));
     $("#updateBtn").addEventListener("click",updateApp);
     document.addEventListener("keydown",e=>{
       if(e.key==="Escape") {
@@ -704,8 +711,6 @@
       else if(k==="arrowright"||k==="d") {e.preventDefault();settings.side="right";syncTypeSide();persist();}
       else if(k===" " && settings.mode==="traditional") {e.preventDefault();settings.type=settings.type==="basic"?"bounce":"basic";syncTypeSide();persist();}
     });
-    document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdates();});
-    window.addEventListener("pageshow",e=>{if(e.persisted)checkUpdates();});
   }
 
   function init() {
@@ -720,8 +725,7 @@
     }
     newNumber();
     updateTimer();
-    checkUpdates();
-    setInterval(checkUpdates,60000);
+    checkUpdates(true);
   }
   init();
 })();

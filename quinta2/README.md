@@ -23,6 +23,22 @@ O aplicativo original continua em \`/quinta/\`
 - A cada 100 acertos acumulados, interrompe o avanço e pergunta se deseja continuar ou encerrar por agora, sem reiniciar os acertos
 - Dados do novo aprendizado ficam no armazenamento existente do QUINTA, mantendo os contadores e demais preferências
 
+## Padrão de atualizações, v2.2.4
+
+Este padrão serve de referência para os futuros apps
+
+- Cada versão publicada atualiza simultaneamente o arquivo `version.json`, a constante `VERSION` e os parâmetros `?v=x.y.z` dos arquivos JS, CSS e ícones
+- Quando uma sessão nova do aplicativo é iniciada, consulta `version.json` com `cache: "no-store"` e um parâmetro de timestamp
+- Se existir uma versão mais recente na abertura inicial, recarrega automaticamente com `?v=x.y.z&t=timestamp`
+- **Não faz verificações periódicas**, nem verifica ao sair do segundo plano ou retornar ao app
+- Em **Configurações > Atualizações**, mostra a versão instalada, o status **Atualizado / Nova versão disponível**, o botão **Verificar** e o botão **Atualizar aplicativo**
+- O botão **Verificar** consulta o servidor na hora, sem recarregar automaticamente, apenas atualiza o status e habilita o botão quando há versão nova
+- **Atualizar aplicativo** recarrega a página apenas por ação explícita do usuário
+- Possui proteção contra loops de redirecionamento quando o GitHub Pages ainda entrega código anterior
+- Preserva preferências e estatísticas no `localStorage` e áudios já importados no IndexedDB
+
+**Observação iOS/PWA:** reabrir uma sessão que permaneceu suspensa na memória não é o mesmo que iniciar uma nova sessão, nesse caso não há checagem automática, exatamente para não interromper o uso, a opção **Verificar** permanece disponível
+
 ## Silêncios do Azure e início de voz, v2.2.3
 
 O ZIP original gerado pelo Azure contém até ~150 ms de silêncio no início e tipicamente de 0,85 a 1,45 segundo no fim de cada gravação
